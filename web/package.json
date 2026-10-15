@@ -1,0 +1,6 @@
+{
+  "name": "factory-mes", "private": true, "version": "1.0.0", "type": "module",
+  "scripts": { "dev": "vite --host 127.0.0.1", "build": "vue-tsc --noEmit && vite build", "android:sync": "cap sync android" },
+  "dependencies": { "vue": "^3.5.22", "vue-router": "^4.6.3", "element-plus": "^2.11.5", "@microsoft/signalr": "^10.0.0", "@capacitor/core": "^7.4.3", "@capacitor/android": "^7.4.3", "@capacitor/preferences": "^7.0.2", "pdfjs-dist": "^5.4.296" },
+  "devDependencies": { "@vitejs/plugin-vue": "^6.0.1", "vite": "^7.1.10", "typescript": "^5.9.3", "vue-tsc": "^3.1.1", "@capacitor/cli": "^7.4.3", "@types/node": "^24.7.2" }
+}
