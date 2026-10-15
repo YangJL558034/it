@@ -1,0 +1,13 @@
+// Optional build-time mirrors, including third-party Capacitor subproject build scripts.
+// Without these environment variables official repositories remain unchanged.
+def rewrite = { repo ->
+    if (repo instanceof org.gradle.api.artifacts.repositories.MavenArtifactRepository) {
+        def url = repo.url.toString()
+        if (System.getenv('MES_ANDROID_MAVEN_MIRROR') && (url.contains('dl.google.com') || url.contains('maven.google.com'))) repo.setUrl(System.getenv('MES_ANDROID_MAVEN_MIRROR'))
+        if (System.getenv('MES_MAVEN_CENTRAL_MIRROR') && (url.contains('repo.maven.apache.org') || url.contains('repo1.maven.org'))) repo.setUrl(System.getenv('MES_MAVEN_CENTRAL_MIRROR'))
+    }
+}
+gradle.beforeProject { project ->
+    project.buildscript.repositories.all(rewrite)
+    project.repositories.all(rewrite)
+}

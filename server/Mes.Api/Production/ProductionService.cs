@@ -38,15 +38,15 @@ public class ProductionService(MesDb db)
         if(sequence>=4)Guard.Check(await LatestPass(u.Id),"最新有效测试未 PASS 或存在待完成测试，禁止放行","test_not_pass",409);
         if(sequence>=5)Guard.Check(u.SnCode!=null,"SN 未绑定，禁止包装","previous_step",409);
     }
-    public async Task AddPassage(Unit u,Station s,Guid? userId,Guid? ruleId=null)
+    public async Task AddPassage(Unit u,Station s,Guid? userId,Guid? ruleId=null,Guid? sopSnapshot=null,bool useSnapshot=false)
     {
         if(await db.Set<Passage>().AnyAsync(x=>x.UnitId==u.Id&&x.ProcessStepId==s.ProcessStepId))return;
-        var sop=await db.Set<SopVersion>().Where(x=>x.ProcessStepId==s.ProcessStepId&&x.Status=="Published").Select(x=>(Guid?)x.Id).FirstOrDefaultAsync();
+        var sop=useSnapshot?sopSnapshot:await db.Set<SopVersion>().Where(x=>x.ProcessStepId==s.ProcessStepId&&x.Status=="Published").Select(x=>(Guid?)x.Id).FirstOrDefaultAsync();
         db.Add(new Passage{UnitId=u.Id,StationId=s.Id,ProcessStepId=s.ProcessStepId,UserId=userId,SopVersionId=sop,BarcodeRuleId=ruleId});
     }
     public async Task<object> Trace(Unit u)=>new{unit=u, batch=await db.Set<Batch>().FindAsync(u.BatchId),passages=await db.Set<Passage>().Where(x=>x.UnitId==u.Id).OrderBy(x=>x.At).ToListAsync(), tests=await (from t in db.Set<TestTask>() join r in db.Set<TestResult>() on t.Id equals r.TestTaskId where t.UnitId==u.Id orderby t.Sequence select new{task=t,result=r,items=db.Set<TestItem>().Where(i=>i.TestResultId==r.Id).ToList()}).ToListAsync()};
 }
-public record ScanInput(Guid RequestId,Guid StationId,Guid BatchId,string Code);
+public record ScanInput(Guid RequestId,Guid StationId,Guid BatchId,string Code,Guid? SopVersionId=null);
 public static class Endpoints
 {
     public static void MapProduction(this WebApplication app)
@@ -61,6 +61,8 @@ public static class Endpoints
             var uid=p.UserId();var s=await prod.Station(input.StationId,p);await prod.Scope(s,input.BatchId);
             var hash=Guard.Hash(JsonSerializer.Serialize(input));var previous=await db.Set<ScanRequest>().SingleOrDefaultAsync(x=>x.UserId==uid&&x.RequestId==input.RequestId);
             if(previous!=null){Guard.Check(previous.Hash==hash,"相同请求编号不能用于不同扫码内容","idempotency_conflict",409);return Results.Content(previous.Response,"application/json");}
+            var activeSop=await db.Set<SopVersion>().Where(v=>v.ProcessStepId==s.ProcessStepId&&v.Status=="Published").Select(v=>(Guid?)v.Id).FirstOrDefaultAsync();
+            Guard.Check(input.SopVersionId==activeSop,"SOP 版本已变化或尚未加载，请等待最新版 SOP 加载后重新扫码","sop_version",409);
             var step=await db.Set<ProcessStep>().FindAsync(s.ProcessStepId);var n=step!.Sequence;Guard.Check(n!=3,"测试工位由仪器自动上传，不接受人工扫码","test_station",409);
             var ctx=await db.Set<ScanContext>().SingleOrDefaultAsync(x=>x.UserId==uid&&x.StationId==s.Id);
             if(ctx==null){ctx=new ScanContext{UserId=uid,StationId=s.Id,BatchId=input.BatchId};db.Add(ctx);}

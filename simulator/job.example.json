@@ -1,0 +1,10 @@
+{
+  "externalTaskId": "replace-with-unique-task-id",
+  "mainCode": "MC000000000001",
+  "deviceCode": "ATE-001",
+  "stationCode": "A01-03",
+  "workOrderId": "00000000-0000-0000-0000-000000000000",
+  "batchId": "00000000-0000-0000-0000-000000000000",
+  "programVersion": "ATE-STD-1",
+  "items": [{"name": "Voltage", "unit": "V", "lower": 4.8, "upper": 5.2}]
+}

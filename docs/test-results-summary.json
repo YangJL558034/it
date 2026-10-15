@@ -1,0 +1,338 @@
+{
+  "environment": "isolated Windows/PostgreSQL development environment; no real instruments",
+  "generatedAt": "2026-10-15T11:57:10.0813964+00:00",
+  "suites": [
+    {
+      "results": [
+        {
+          "name": "不同用户/不同请求并发争用同一电芯，只有一个绑定成功",
+          "status": "passed"
+        },
+        {
+          "name": "操作员不能访问未授权工位或工序 SOP",
+          "status": "passed"
+        },
+        {
+          "name": "过期或未加载的 SOP 版本禁止过站",
+          "status": "passed"
+        },
+        {
+          "name": "角色权限由数据库配置，撤销后现有会话立即失权",
+          "status": "passed"
+        },
+        {
+          "name": "工位授权撤销后不能继续已有扫码上下文",
+          "status": "passed"
+        },
+        {
+          "name": "等待写事务期间账户被停用，已通过初次认证的排队请求仍被拒绝",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:20.253Z",
+      "suite": "hardening"
+    },
+    {
+      "results": [
+        {
+          "status": "passed",
+          "name": "有效独立路径配置通过只读预检"
+        },
+        {
+          "status": "passed",
+          "name": "程序与数据互相包含被拒绝"
+        },
+        {
+          "status": "passed",
+          "name": "业务目录等于数据根目录被拒绝"
+        },
+        {
+          "status": "passed",
+          "name": "业务目录互相包含被拒绝"
+        },
+        {
+          "status": "passed",
+          "name": "弱初始密码被拒绝"
+        },
+        {
+          "status": "passed",
+          "name": "服务与数据库端口冲突被拒绝"
+        },
+        {
+          "status": "passed",
+          "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）"
+        }
+      ],
+      "at": "2026-10-15T19:50:16.9767319+08:00",
+      "suite": "installer"
+    },
+    {
+      "results": [
+        {
+          "name": "数据库与服务器文件读写健康检查",
+          "status": "passed"
+        },
+        {
+          "name": "匿名访问管理接口返回 401",
+          "status": "passed"
+        },
+        {
+          "name": "产线、五工位、工单、批次建立真实外键关系",
+          "status": "passed"
+        },
+        {
+          "name": "批次总量不能超过工单计划",
+          "status": "passed"
+        },
+        {
+          "name": "有批次的工单禁止删除或改关联",
+          "status": "passed"
+        },
+        {
+          "name": "已有批次可安全调整工单计划，但不得低于批次合计",
+          "status": "passed"
+        },
+        {
+          "name": "外键不存在不能建立工位",
+          "status": "passed"
+        },
+        {
+          "name": "操作员禁止管理用户和计划",
+          "status": "passed"
+        },
+        {
+          "name": "退出后令牌不可再次使用",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:02.022Z",
+      "suite": "phase1"
+    },
+    {
+      "results": [
+        {
+          "name": "条码不合规不创建生产记录",
+          "status": "passed"
+        },
+        {
+          "name": "未主码过站不能绑定电芯",
+          "status": "passed"
+        },
+        {
+          "name": "并发相同请求幂等，仅一个主码一次计数",
+          "status": "passed"
+        },
+        {
+          "name": "绑定前跳过电芯进入 SN 被拦截",
+          "status": "passed"
+        },
+        {
+          "name": "跨批次主码不能重复过站",
+          "status": "passed"
+        },
+        {
+          "name": "同一输入协议自动进入等待电芯码并原子绑定",
+          "status": "passed"
+        },
+        {
+          "name": "未通过测试禁止 SN 和包装",
+          "status": "passed"
+        },
+        {
+          "name": "仪器工位拒绝手工扫码",
+          "status": "passed"
+        },
+        {
+          "name": "已有生产历史的批次不得删除",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:03.321Z",
+      "suite": "phase2"
+    },
+    {
+      "results": [
+        {
+          "name": "设备密钥认证，错误密钥拒绝",
+          "status": "passed"
+        },
+        {
+          "name": "无主码/无电芯工艺检查拒绝并保留异常",
+          "status": "passed"
+        },
+        {
+          "name": "跨工单工艺检查拒绝",
+          "status": "passed"
+        },
+        {
+          "name": "待测任务阻止后续流转",
+          "status": "passed"
+        },
+        {
+          "name": "参数不完整保留异常，不完成任务",
+          "status": "passed"
+        },
+        {
+          "name": "SignalR 数据提交后通知",
+          "status": "passed"
+        },
+        {
+          "name": "FAIL 拦截 SN 放行",
+          "status": "passed"
+        },
+        {
+          "name": "12 并发重复上传只保存一份结果",
+          "status": "passed"
+        },
+        {
+          "name": "同一记录号篡改内容拒绝",
+          "status": "passed"
+        },
+        {
+          "name": "未知任务原报文保留，不推进",
+          "status": "passed"
+        },
+        {
+          "name": "复测追加 PASS，历史 FAIL 和参数仍保留",
+          "status": "passed"
+        },
+        {
+          "name": "PASS 后再次复测 FAIL 必须拦截",
+          "status": "passed"
+        },
+        {
+          "name": "最终 PASS 完成 SN 包装闭环且测试数量不重复",
+          "status": "passed"
+        },
+        {
+          "name": "流转后补测拒绝，异常接收可追查",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:04.801Z",
+      "suite": "phase3"
+    },
+    {
+      "results": [
+        {
+          "name": "未审核 SOP 禁止发布",
+          "status": "passed"
+        },
+        {
+          "name": "服务器拒绝 SVG/HTML 伪装附件",
+          "status": "passed"
+        },
+        {
+          "name": "一次上传多份实际 PNG 与 PDF 文件",
+          "status": "passed"
+        },
+        {
+          "name": "逐份播放顺序和停留时间保存",
+          "status": "passed"
+        },
+        {
+          "name": "创建人不能自己审核，其他质量人员审核后可发布",
+          "status": "passed"
+        },
+        {
+          "name": "发布版本禁止修改，文件必须认证读取",
+          "status": "passed"
+        },
+        {
+          "name": "过站保存实际发布 SOP 版本",
+          "status": "passed"
+        },
+        {
+          "name": "重要消息与重复确认幂等",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:05.692Z",
+      "suite": "phase4"
+    },
+    {
+      "results": [
+        {
+          "name": "导出必须具体工单与批次，批次错配禁止",
+          "status": "passed"
+        },
+        {
+          "name": "筛选产品的测试导出包含 FAIL PASS 复测及参数",
+          "status": "passed"
+        },
+        {
+          "name": "TV 独立只读权限与真实五工序数据",
+          "status": "passed"
+        },
+        {
+          "name": "PostgreSQL 与 SOP 文件实际备份并可下载",
+          "status": "passed"
+        },
+        {
+          "name": "恢复前校验摘要并展示范围",
+          "status": "passed"
+        },
+        {
+          "name": "恢复缺少准确管理员确认时禁止",
+          "status": "passed"
+        },
+        {
+          "name": "隔离开发库实际恢复、维护期间拒绝写入、恢复前备份和会话撤销",
+          "status": "passed"
+        },
+        {
+          "name": "恢复后数据库与附件一致、HTTP 健康正常",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:14.679Z",
+      "suite": "phase5"
+    },
+    {
+      "results": [
+        {
+          "status": "passed",
+          "name": "直接启动 win-x64 自包含 EXE，数据库/文件健康、编译前端及真实登录退出通过"
+        }
+      ],
+      "at": "2026-10-15T19:56:25.4011913+08:00",
+      "suite": "published"
+    },
+    {
+      "results": [
+        {
+          "name": "独立设备模拟器实际运行 FAIL/PASS 复测及重试去重",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:54:21.055Z",
+      "suite": "simulator"
+    },
+    {
+      "results": [
+        {
+          "name": "浏览器真实登录与管理后台渲染",
+          "status": "passed"
+        },
+        {
+          "name": "工位仅一个扫码框，连续主码自动提交",
+          "status": "passed"
+        },
+        {
+          "name": "TV 1080p 与 4K 只读布局无管理入口",
+          "status": "passed"
+        },
+        {
+          "name": "TV 断线提示与重连恢复",
+          "status": "passed"
+        },
+        {
+          "name": "运行时无未处理 JavaScript 异常",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-15T11:47:45.517Z",
+      "suite": "ui"
+    }
+  ]
+}

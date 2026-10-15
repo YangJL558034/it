@@ -48,7 +48,7 @@ public static class AuthEndpoints
                 return Results.Ok(new { authenticated = false, message = "账号或密码错误" });
             }
             u.FailedLogins = 0; u.LockedUntil = null;
-            var token = Guard.Token(); db.Add(new Session { UserId = u.Id, TokenHash = Guard.Hash(token), Expires = DateTimeOffset.UtcNow.AddHours(8) }); await db.SaveChangesAsync();
+            var token = Guard.Token(); db.Add(new Session { UserId = u.Id, TokenHash = Guard.Hash(token), Expires = u.Role=="TV"?DateTimeOffset.UtcNow.AddDays(30):DateTimeOffset.UtcNow.AddHours(8) }); await db.SaveChangesAsync();
             return Results.Ok(new { authenticated = true, token, user = new { u.Id, u.Account, u.Name, u.Role } });
         }).RequireRateLimiting("login");
         app.MapGet("/api/auth/me", async (ClaimsPrincipal p, MesDb db) => await db.Users.Where(x => x.Id == p.UserId()).Select(u => new { u.Id, u.Account, u.Name, u.Role }).SingleAsync()).RequireAuthorization();
@@ -69,5 +69,6 @@ public static class AuthEndpoints
             foreach (var (kind, prefix, len) in new[] { ("main", "MC", 14), ("cell", "CELL", 16), ("sn", "SN", 14), ("pack", "PK", 14) }) db.Add(new BarcodeRule { Kind = kind, Prefixes = [prefix], Length = len, Version = 1 });
         }
         await db.SaveChangesAsync();
+        await Permissions.Seed(db);
     }
 }

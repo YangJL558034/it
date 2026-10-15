@@ -1,0 +1,21 @@
+import fs from 'node:fs/promises'
+import {assert,req,ok,login,test,save,fixture,suffix,base,token,secret} from './helpers.mjs'
+async function until(fn,timeout=90000){const end=Date.now()+timeout;while(Date.now()<end){const r=await fn();if(r)return r;await new Promise(r=>setTimeout(r,500))}throw Error('后台任务超时')}
+try{
+await login();const catalog=await ok('/api/catalog'),tests=await ok('/api/tests');assert.ok(tests.length>0,'先运行 phase3');const selected=tests[0],batch=catalog.batches.find(b=>b.id===selected.task.batchId),f={workOrderId:batch.workOrderId,batchId:batch.id,mainCode:selected.mainCode,verdict:'FAIL'};
+await test('导出必须具体工单与批次，批次错配禁止',async()=>{assert.equal((await req('/api/exports',{kind:'products',filter:{workOrderId:crypto.randomUUID(),batchId:crypto.randomUUID()}})).status,422);assert.equal((await req('/api/exports',{kind:'products',filter:{workOrderId:batch.workOrderId,batchId:crypto.randomUUID()}})).status,422)});
+await test('筛选产品的测试导出包含 FAIL PASS 复测及参数',async()=>{const j=await ok('/api/exports',{kind:'tests',filter:f});const done=await until(async()=>{const x=(await ok('/api/exports')).find(x=>x.id===j.id);if(x.status==='Failed')throw Error(x.error);return x.status==='Completed'&&x});const r=await fetch(base+'/api/exports/'+done.id+'/download',{headers:{Authorization:'Bearer '+token}});const csv=await r.text();assert.ok(csv.includes('FAIL')&&csv.includes('PASS')&&csv.includes('Voltage'));assert.equal(csv.trim().split('\n').length,5);assert.ok(csv.split('\n').slice(1).filter(Boolean).every(l=>l.includes(selected.mainCode)&&l.includes(batch.id)))});
+await test('TV 独立只读权限与真实五工序数据',async()=>{const pwd='Tv9-'+crypto.randomUUID();await ok('/api/admin/users',{account:'tv'+suffix,name:'TV',role:'TV',password:pwd});const tv=(await ok('/api/auth/login',{account:'tv'+suffix,password:pwd})).token;const d=await req('/api/tv',undefined,'GET',tv);assert.equal(d.status,200);assert.equal(d.data.processes.length,5);assert.ok(d.data.completed>0);assert.equal((await req('/api/catalog',undefined,'GET',tv)).status,403);assert.equal((await req('/api/admin/lines',{code:'BAD',name:'BAD',workshop:'BAD'},'POST',tv)).status,403)});
+let backup,preview;
+await test('PostgreSQL 与 SOP 文件实际备份并可下载',async()=>{backup=await ok('/api/backups',{});backup=await until(async()=>{const x=(await ok('/api/backups')).find(x=>x.id===backup.id);if(x.status==='Failed')throw Error(x.error);return x.status==='Completed'&&x});const r=await fetch(base+'/api/backups/'+backup.id+'/download',{headers:{Authorization:'Bearer '+token}});assert.equal(r.status,200);const b=Buffer.from(await r.arrayBuffer());assert.equal(b.subarray(0,2).toString(),'PK');assert.ok(b.length>1000)});
+await test('恢复前校验摘要并展示范围',async()=>{preview=await ok('/api/backups/'+backup.id+'/preview',{});assert.ok(preview.manifest.databaseSha256);assert.ok(Object.keys(preview.manifest.files).some(k=>k.startsWith('sop/')))});
+await test('恢复缺少准确管理员确认时禁止',async()=>assert.equal((await req('/api/backups/'+backup.id+'/restore',{ticket:preview.ticket,confirmation:'yes'})).status,422));
+const marker=await ok('/api/admin/products',{code:'AFTER-BACKUP'+suffix,name:'恢复后应消失的测试产品'});
+await test('隔离开发库实际恢复、维护期间拒绝写入、恢复前备份和会话撤销',async()=>{
+ assert.equal((await req('/api/backups/'+backup.id+'/restore',{ticket:preview.ticket,confirmation:preview.confirmation})).status,202);
+ assert.equal((await req('/api/admin/products',{code:'DURING'+suffix,name:'blocked'})).status,503);
+ await until(async()=>{try{return (await req('/api/health',undefined,'GET','')).data.status==='ok'}catch{return false}},180000);
+ await login();const state=await ok('/api/maintenance');assert.equal(state.status,'Completed',JSON.stringify(state));assert.ok(!(await ok('/api/admin/products')).some(p=>p.id===marker.id));const pre=JSON.parse(await fs.readFile(new URL('../../.local/storage/backups/last-pre-restore.json',import.meta.url),'utf8'));assert.ok(pre.file);await fs.access(new URL('../../.local/storage/backups/'+pre.file,import.meta.url));
+});
+await test('恢复后数据库与附件一致、HTTP 健康正常',async()=>{assert.equal((await ok('/api/health')).status,'ok');const versions=await ok('/api/sop/versions');for(const v of versions)for(const f of v.files){const r=await fetch(base+'/api/sop/files/'+f.id,{headers:{Authorization:'Bearer '+token}});assert.equal(r.status,200)}});
+}finally{await save('phase5')}

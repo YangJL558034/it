@@ -7,6 +7,7 @@ namespace Mes.Api.Instruments;
 
 public class InstrumentService(MesDb db,ProductionService production,IEnumerable<IInstrumentProtocol> protocols)
 {
+    public async Task<object> ReceiveRaw(HttpRequest request,string operation){var d=await Authenticate(request);using var reader=new StreamReader(request.Body);var buffer=new char[1024*1024+1];var length=await reader.ReadBlockAsync(buffer);Guard.Check(length<=1024*1024,"报文超过 1 MB");var raw=new string(buffer,0,length);try{using var json=JsonDocument.Parse(raw);return await Receive(d,operation,json.RootElement);}catch(JsonException){var r=new Receipt{DeviceId=d.Id,Operation=operation,Raw=raw,Status="Rejected",Reason="无法解析 JSON 报文"};db.Add(r);await db.SaveChangesAsync();return new{accepted=false,code="invalid_json",message=r.Reason,receiptId=r.Id};}}
     public async Task<Device> Authenticate(HttpRequest request,string protocol="generic-v1")
     {
         var key=request.Headers["X-Device-Key"].ToString();Guard.Check(key.Length>=32,"设备身份认证失败","device_unauthorized",401);var hash=Guard.Hash(key);
@@ -40,7 +41,7 @@ public class InstrumentService(MesDb db,ProductionService production,IEnumerable
         Guard.Check(u.SnCode==null&&u.PackCode==null,"产品已流转后段，新测试需异常处理，不自动覆盖","already_released",409);
         Guard.Check(!await db.Set<TestTask>().AnyAsync(x=>x.UnitId==u.Id&&x.Status=="Pending"),"已有未完成测试任务，请使用原任务编号重试","pending_task",409);
         var specs=JsonSerializer.Deserialize<Specification[]>(d.RequiredItems,new JsonSerializerOptions(JsonSerializerDefaults.Web));Guard.Check(specs?.Length>0,"设备未配置测试标准项目");
-        var task=new TestTask{UnitId=u.Id,DeviceId=d.Id,StationId=s.Id,BatchId=i.BatchId,ExternalId=i.ExternalTaskId,ProgramVersion=d.ProgramVersion,Specification=d.RequiredItems};db.Add(task);await db.SaveChangesAsync();return new{taskId=task.Id,status=task.Status,duplicate=false};
+        var sop=await db.Set<SopVersion>().Where(v=>v.ProcessStepId==s.ProcessStepId&&v.Status=="Published").Select(v=>(Guid?)v.Id).FirstOrDefaultAsync();var task=new TestTask{SopVersionId=sop,UnitId=u.Id,DeviceId=d.Id,StationId=s.Id,BatchId=i.BatchId,ExternalId=i.ExternalTaskId,ProgramVersion=d.ProgramVersion,Specification=d.RequiredItems};db.Add(task);await db.SaveChangesAsync();return new{taskId=task.Id,status=task.Status,duplicate=false};
     }
     async Task<object> Upload(Device d,Upload i,string raw)
     {
@@ -58,8 +59,8 @@ public class InstrumentService(MesDb db,ProductionService production,IEnumerable
         Guard.Check(i.Items!=null&&i.Items.Length==spec.Length&&i.Items.Select(x=>x.Name).Distinct().Count()==spec.Length,"测试参数缺失、重复或项目数量不匹配");
         foreach(var rule in spec){var v=i.Items!.SingleOrDefault(x=>x.Name==rule.Name);Guard.Check(v!=null&&v.Unit==rule.Unit&&v.Lower==rule.Lower&&v.Upper==rule.Upper,"参数名称、单位或上下限不符合任务标准");var pass=v!.Value>=rule.Lower&&v.Value<=rule.Upper;Guard.Check(v.Verdict==(pass?"PASS":"FAIL"),"项目判定与数值上下限矛盾");}
         var verdict=i.Items!.All(x=>x.Verdict=="PASS")?"PASS":"FAIL";Guard.Check(i.Verdict==verdict,"总判定与参数判定矛盾");
-        var r=new TestResult{TestTaskId=t.Id,DeviceId=d.Id,RecordId=i.RecordId,TestedAt=i.TestedAt,Verdict=verdict,PayloadHash=hash,Raw=raw};db.Add(r);
+        var r=new TestResult{TestTaskId=t.Id,DeviceId=d.Id,RecordId=i.RecordId,TestedAt=i.TestedAt.ToUniversalTime(),Verdict=verdict,PayloadHash=hash,Raw=raw};db.Add(r);
         foreach(var m in i.Items!)db.Add(new TestItem{TestResultId=r.Id,Name=m.Name,Value=m.Value,Unit=m.Unit,Lower=m.Lower,Upper=m.Upper,Verdict=m.Verdict});
-        t.Status="Completed";if(verdict=="PASS")await production.AddPassage(u,s,null);await db.SaveChangesAsync();return new{resultId=r.Id,duplicate=false,verdict};
+        t.Status="Completed";if(verdict=="PASS")await production.AddPassage(u,s,null,null,t.SopVersionId,true);await db.SaveChangesAsync();return new{resultId=r.Id,duplicate=false,verdict};
     }
 }

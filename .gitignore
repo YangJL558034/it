@@ -17,3 +17,4 @@ artifacts/
 **/appsettings.Local.json
 **/test-results/
 **/playwright-report/
+web/android/app/src/main/assets/public/

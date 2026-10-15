@@ -27,3 +27,5 @@ export async function connect(refresh:()=>void){await disconnect();hub=new HubCo
 export async function disconnect(){if(hub)await hub.stop();hub=undefined;state.connected=false}
 export async function download(path:string,name:string){const url=URL.createObjectURL(await blob(path));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 export function stamp(value:string){return value?new Date(value).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false}):'—'}
+
+export function uuid(){return typeof crypto.randomUUID==='function'?crypto.randomUUID():'10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(Number(c)^crypto.getRandomValues(new Uint8Array(1))[0]!&15>>Number(c)/4).toString(16))}

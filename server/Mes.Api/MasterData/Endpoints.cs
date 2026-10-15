@@ -23,6 +23,9 @@ public static class Endpoints
         Crud<Batch>(app, "batches", (x, j) => { x.Code = Str(j,"code"); x.WorkOrderId = Id(j,"workOrderId"); x.Plan = Num(j,"plan"); });
         app.MapGet("/api/admin/users", async (MesDb db) => await db.Users.Select(x => new { x.Id, x.Account, x.Name, x.Role, x.Active }).ToListAsync()).RequireAuthorization("Admin");
         app.MapGet("/api/admin/roles", () => Roles).RequireAuthorization("Admin");
+        app.MapGet("/api/admin/permissions",async(MesDb db)=>await db.Set<RolePermission>().ToListAsync()).RequireAuthorization("Admin");
+        app.MapPost("/api/admin/permissions",async(RolePermission input,MesDb db)=>{Guard.Check(Roles.Contains(input.Role)&&input.Role!="Admin"&&Permissions.Names.Contains(input.Permission),"角色或权限无效；管理员权限不可撤销");input.Id=Guid.NewGuid();db.Add(input);await db.SaveChangesAsync();return Results.Ok(input);}).RequireAuthorization("Admin");
+        app.MapDelete("/api/admin/permissions/{id:guid}",async(Guid id,MesDb db)=>{await db.Set<RolePermission>().Where(x=>x.Id==id).ExecuteDeleteAsync();return Results.Ok();}).RequireAuthorization("Admin");
         app.MapGet("/api/admin/grants", async (MesDb db) => await db.Set<StationGrant>().ToListAsync()).RequireAuthorization("Admin");
         app.MapPost("/api/admin/users", async (JsonElement j, MesDb db) => {
             var u = new User { Account = Str(j,"account"), Name = Str(j,"name"), Role = Str(j,"role") };
@@ -44,7 +47,7 @@ public static class Endpoints
             Guard.Check(r.Prefixes.Length <= 20 && r.Prefixes.All(p=>p.Length>0 && p.Length<=r.Length && System.Text.RegularExpressions.Regex.IsMatch(p, r.Charset=="numeric" ? "^[0-9]+$" : r.Charset=="alnum" ? "^[A-Za-z0-9]+$" : "^[!-~]+$")), "前缀与长度或字符类型不兼容");
             r.Id=Guid.NewGuid(); r.Version=(await db.Set<BarcodeRule>().Where(x=>x.Kind==r.Kind).MaxAsync(x=>(int?)x.Version)??0)+1; r.PublishedAt=DateTimeOffset.UtcNow; db.Add(r); await db.Set<ScanContext>().ExecuteDeleteAsync(); await db.SaveChangesAsync(); return Results.Ok(r);
         }).RequireAuthorization("Admin");
-        app.MapGet("/api/admin/settings", async (MesDb db) => await db.Set<Setting>().ToListAsync()).RequireAuthorization("Admin");
+        app.MapGet("/api/admin/settings", async (MesDb db) => await db.Set<Setting>().Where(x=>x.Key!="permissionsInitialized").ToListAsync()).RequireAuthorization("Admin");
         app.MapPut("/api/admin/settings", async (JsonElement j, MesDb db) => {
             foreach(var prop in j.EnumerateObject()) { Guard.Check(new[]{"factory","backupIntervalHours","backupRetentionDays"}.Contains(prop.Name), "配置项不允许"); var val=prop.Value.ToString();
                 if(prop.Name!="factory") Guard.Check(int.TryParse(val,out var n) && n>=1 && n<=3650,"数值须为 1–3650");
@@ -59,7 +62,7 @@ public static class Endpoints
         app.MapPut("/api/admin/"+path+"/{id:guid}", async (Guid id,JsonElement j,MesDb db)=> {
             var x=await db.Set<T>().SingleOrDefaultAsync(x=>x.Id==id); Guard.Check(x!=null,"记录不存在", "not_found",404);
             var before=JsonSerializer.Serialize(x); assign(x!,j);
-            if(before!=JsonSerializer.Serialize(x)) await Protect(db,x!);
+            if(before!=JsonSerializer.Serialize(x)) await ProtectUpdate(db,x!);
             await Validate(db,x!); await db.SaveChangesAsync(); return Results.Ok(x);
         }).RequireAuthorization("Manage");
         app.MapDelete("/api/admin/"+path+"/{id:guid}", async(Guid id,MesDb db)=> {var x=await db.Set<T>().FindAsync(id); Guard.Check(x!=null,"记录不存在","not_found",404); await Protect(db,x!); db.Remove(x!); await db.SaveChangesAsync(); return Results.Ok();}).RequireAuthorization("Manage");
@@ -73,6 +76,13 @@ public static class Endpoints
             Line => await db.Set<WorkOrder>().AnyAsync(x=>x.LineId==row.Id) || await db.Set<Station>().AnyAsync(x=>x.LineId==row.Id),
             Product => await db.Set<WorkOrder>().AnyAsync(x=>x.ProductId==row.Id), _=>false
         }; Guard.Check(!used,"已有下游关联或生产历史，禁止修改/删除；请新建版本或新工单","referenced",409);
+    }
+    static async Task ProtectUpdate<T>(MesDb db,T row) where T:Row
+    {
+        string[] keys=row switch{WorkOrder=>["Code","LineId","ProductId"],Batch=>["Code","WorkOrderId"],Station=>["Code","LineId","ProcessStepId"],Line=>["Code"],Product=>["Code"],_=>[]};
+        if(keys.Any(k=>!Equals(db.Entry(row).Property(k).OriginalValue,db.Entry(row).Property(k).CurrentValue)))await Protect(db,row);
+        if(row is WorkOrder order){var planned=await db.Set<Batch>().Where(b=>b.WorkOrderId==order.Id).SumAsync(b=>b.Plan);Guard.Check(order.Plan>=planned,"工单计划不能少于已分配的批次数量");if(order.Status=="Closed")Guard.Check(!await (from t in db.Set<TestTask>() join b in db.Set<Batch>() on t.BatchId equals b.Id where b.WorkOrderId==order.Id&&t.Status=="Pending" select t).AnyAsync(),"存在未完成测试任务，不能关闭工单","pending_task",409);}
+        if(row is Batch batch)Guard.Check(batch.Plan>=await db.Set<Unit>().CountAsync(u=>u.BatchId==batch.Id),"批次计划不能少于已投入的产品数");
     }
     static async Task Validate<T>(MesDb db,T row) where T:Row
     {

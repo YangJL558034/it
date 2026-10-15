@@ -27,7 +27,7 @@
 接收接口的 HTTP 200 表示接收日志保存成功，必须继续检查 `accepted`：
 - 成功 `{accepted:true,data:{taskId,...}}` 或 `{accepted:true,data:{resultId,duplicate,verdict}}`。
 - 业务拒绝 `{accepted:false,code,message,receiptId}`，保存原报文为异常，绝不能放行。
-- 认证错误 401/403；无效 JSON 400；系统错误 500。发生超时/500，设备用相同记录编号及相同报文重试。
+- 认证错误 401/403；已认证设备的无效 JSON 也保存为异常接收，返回 `accepted:false`；系统错误 500。发生超时/500，设备用相同记录编号及相同报文重试。
 
 每台设备的 recordId 唯一，相同内容重试只存一次 TestResult；改变内容拒绝并保留接收日志。一次任务只能一个结果，复测必须新建 externalTaskId/recordId，不覆盖旧结果。原始报文保存在 TestResult 和 Receipt；rawFileReference 仅作外部记录引用，不会由服务器自动下载。
 

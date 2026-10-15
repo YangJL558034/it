@@ -22,14 +22,14 @@ public static class Endpoints
         app.MapPost("/api/admin/devices/{id:guid}/rotate",async(Guid id,MesDb db)=>{var d=await db.Set<Device>().FindAsync(id);Guard.Check(d!=null,"设备不存在");var key=Guard.Token();d!.KeyHash=Guard.Hash(key);await db.SaveChangesAsync();return Results.Ok(new{key});}).RequireAuthorization("Admin");
         app.MapPost("/api/admin/devices/{id:guid}/disable",async(Guid id,MesDb db)=>{var d=await db.Set<Device>().FindAsync(id);Guard.Check(d!=null,"设备不存在");d!.Active=false;await db.SaveChangesAsync();return Results.Ok();}).RequireAuthorization("Admin");
         app.MapGet("/api/admin/receipts",async(MesDb db)=>await db.Set<Receipt>().OrderByDescending(x=>x.At).Take(200).ToListAsync()).RequireAuthorization("Office");
-        app.MapPost("/api/instrument/v1/check",async(HttpRequest r,JsonElement j,InstrumentService service)=>await service.Receive(await service.Authenticate(r),"check",j));
-        app.MapPost("/api/instrument/v1/results",async(HttpRequest r,JsonElement j,InstrumentService service)=>await service.Receive(await service.Authenticate(r),"results",j));
+        app.MapPost("/api/instrument/v1/check",async(HttpRequest r,InstrumentService service)=>await service.ReceiveRaw(r,"check"));
+        app.MapPost("/api/instrument/v1/results",async(HttpRequest r,InstrumentService service)=>await service.ReceiveRaw(r,"results"));
         app.MapPost("/api/instrument/v1/heartbeat",async(HttpRequest r,InstrumentService service,MesDb db)=>{await service.Authenticate(r);await db.SaveChangesAsync();return Results.Ok(new{status="ok"});});
         app.MapGet("/api/instrument/v1/work-orders",async(HttpRequest r,InstrumentService service,MesDb db)=>{var d=await service.Authenticate(r);var s=await db.Set<Station>().FindAsync(d.StationId);var orders=await db.Set<WorkOrder>().Where(o=>o.LineId==s!.LineId&&o.Status=="Open").ToListAsync();var ids=orders.Select(o=>o.Id).ToArray();return new{deviceCode=d.Code,stationCode=s!.Code,orders,batches=await db.Set<Batch>().Where(b=>ids.Contains(b.WorkOrderId)).ToListAsync()};});
         app.MapPost("/api/instrument/v1/user",async(HttpRequest r,JsonElement j,InstrumentService service,MesDb db)=>{var d=await service.Authenticate(r);var account=Str(j,"account");var u=await db.Users.SingleOrDefaultAsync(x=>x.Account==account&&x.Active);Guard.Check(u!=null&&await db.Set<StationGrant>().AnyAsync(g=>g.UserId==u.Id&&g.StationId==d.StationId),"该用户未获得设备工位授权","forbidden",403);return new{u!.Id,u.Account,u.Name,stationId=d.StationId};});
         app.MapGet("/api/tests",async(Guid? stationId,Guid? batchId,ClaimsPrincipal p,MesDb db,ProductionService prod)=>{
-            if(p.IsInRole("Operator")){Guard.Check(stationId!=null&&batchId!=null,"必须指定工位与批次");await prod.Station(stationId!.Value,p);}
+            if(!await Permissions.Has(p,"Office",db)){Guard.Check(stationId!=null&&batchId!=null,"必须指定工位与批次");await prod.Station(stationId!.Value,p);}
             return await (from t in db.Set<TestTask>() join r in db.Set<TestResult>() on t.Id equals r.TestTaskId join u in db.Set<Unit>() on t.UnitId equals u.Id where (!stationId.HasValue||t.StationId==stationId)&&(!batchId.HasValue||t.BatchId==batchId) orderby r.ReceivedAt descending select new{mainCode=u.MainCode,task=t,result=r,items=db.Set<TestItem>().Where(x=>x.TestResultId==r.Id).ToList()}).Take(100).ToListAsync();
-        }).RequireAuthorization(p=>p.RequireRole("Admin","Supervisor","Quality","Operator"));
+        }).RequireAuthorization("ReadProduction");
     }
 }

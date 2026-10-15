@@ -2,10 +2,11 @@ import fs from 'node:fs/promises'
 import assert from 'node:assert/strict'
 export {assert}
 export const base=process.env.MES_URL||'http://127.0.0.1:5080'
+const target=new URL(base);if(!['127.0.0.1','localhost'].includes(target.hostname)||target.port!=='5080')throw Error('集成脚本会创建及恢复测试数据，只允许本机隔离开发服务端口 5080。');
 export const secret=JSON.parse((await fs.readFile(new URL('../../.local/development.json',import.meta.url),'utf8')).replace(/^\uFEFF/,''))
 export let token=''
 export const results=[]
-export async function req(path,body,method=body===undefined?'GET':'POST',auth=token){const r=await fetch(base+path,{method,headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},body:body===undefined?undefined:JSON.stringify(body)});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data=text}return {status:r.status,data}}
+export async function req(path,body,method=body===undefined?'GET':'POST',auth=token){if(path==='/api/station/scan'&&body.sopVersionId===undefined){const catalog=await (await fetch(base+'/api/catalog',{headers:{Authorization:'Bearer '+token}})).json();const station=catalog.stations.find(s=>s.id===body.stationId);if(station){const sop=await (await fetch(base+'/api/sop/current/'+station.processStepId,{headers:{Authorization:'Bearer '+token}})).json();body.sopVersionId=sop.version?.id||null;}}const r=await fetch(base+path,{method,headers:{'Content-Type':'application/json',...(auth?{Authorization:'Bearer '+auth}:{})},body:body===undefined?undefined:JSON.stringify(body)});const text=await r.text();let data;try{data=JSON.parse(text)}catch{data=text}return {status:r.status,data}}
 export async function ok(path,body,method){const r=await req(path,body,method);assert.ok(r.status<300,JSON.stringify(r));return r.data}
 export async function login(){const r=await ok('/api/auth/login',{account:'admin',password:secret.adminPassword});assert.equal(r.authenticated,true);token=r.token}
 export async function test(name,fn){try{await fn();results.push({name,status:'passed'});console.log('PASS',name)}catch(e){results.push({name,status:'failed',error:String(e)});throw e}}

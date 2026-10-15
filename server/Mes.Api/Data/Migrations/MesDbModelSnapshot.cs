@@ -455,6 +455,28 @@ namespace Mes.Api.Data.Migrations
                     b.ToTable("Receipt");
                 });
 
+            modelBuilder.Entity("Mes.Api.Data.RolePermission", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Permission")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Role", "Permission")
+                        .IsUnique();
+
+                    b.ToTable("RolePermission");
+                });
+
             modelBuilder.Entity("Mes.Api.Data.ScanContext", b =>
                 {
                     b.Property<Guid>("Id")
@@ -816,6 +838,9 @@ namespace Mes.Api.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Sequence"));
 
+                    b.Property<Guid?>("SopVersionId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Specification")
                         .IsRequired()
                         .HasColumnType("text");
@@ -833,6 +858,8 @@ namespace Mes.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
+
+                    b.HasIndex("SopVersionId");
 
                     b.HasIndex("StationId");
 
@@ -1231,6 +1258,11 @@ namespace Mes.Api.Data.Migrations
                         .HasForeignKey("DeviceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Mes.Api.Data.SopVersion", null)
+                        .WithMany()
+                        .HasForeignKey("SopVersionId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Mes.Api.Data.Station", null)
                         .WithMany()

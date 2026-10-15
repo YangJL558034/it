@@ -1,0 +1,8 @@
+* text=auto
+*.sh text eol=lf
+web/android/gradlew text eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
+*.jar binary
+docs/third-party/*.txt -text -whitespace

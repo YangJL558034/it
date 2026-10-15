@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Mes.Api.Security;
 namespace Mes.Api.Instruments;
 
 // Vendor adapters implement only protocol translation. Domain checks are shared and cannot be bypassed.
@@ -12,8 +13,8 @@ public sealed class GenericV1 : IInstrumentProtocol
 {
     public string Id=>"generic-v1";
     static readonly JsonSerializerOptions Json=new(JsonSerializerDefaults.Web);
-    public Upload NormalizeResult(JsonElement p)=>p.Deserialize<Upload>(Json)??throw new JsonException("缺少测试结果");
-    public Check NormalizeCheck(JsonElement p)=>p.Deserialize<Check>(Json)??throw new JsonException("缺少工艺检查参数");
+    public Upload NormalizeResult(JsonElement p){var i=p.Deserialize<Upload>(Json)??throw new JsonException("缺少测试结果");Guard.Check(new[]{i.RecordId,i.MainCode,i.DeviceCode,i.StationCode,i.ProgramVersion,i.Verdict}.All(x=>!string.IsNullOrWhiteSpace(x))&&i.TaskId!=Guid.Empty&&i.Items!=null&&i.Items.All(x=>x!=null&&!string.IsNullOrWhiteSpace(x.Name)&&!string.IsNullOrWhiteSpace(x.Unit)&&!string.IsNullOrWhiteSpace(x.Verdict)),"测试结果必填字段缺失");return i;}
+    public Check NormalizeCheck(JsonElement p){var i=p.Deserialize<Check>(Json)??throw new JsonException("缺少工艺检查参数");Guard.Check(new[]{i.ExternalTaskId,i.MainCode,i.DeviceCode,i.StationCode,i.ProgramVersion}.All(x=>!string.IsNullOrWhiteSpace(x))&&i.WorkOrderId!=Guid.Empty&&i.BatchId!=Guid.Empty,"工艺检查必填字段缺失");return i;}
 }
 public record Specification { public required string Name {get;init;} public required string Unit {get;init;} public required decimal Lower {get;init;} public required decimal Upper {get;init;} }
 public record Measurement : Specification { public required decimal Value {get;init;} public required string Verdict {get;init;} }

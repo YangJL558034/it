@@ -16,6 +16,7 @@ public class MesDb(DbContextOptions<MesDb> options) : DbContext(options)
         b.Entity<Batch>().HasIndex(x => x.Code).IsUnique();
         b.Entity<ProcessStep>().HasIndex(x => x.Sequence).IsUnique();
         b.Entity<StationGrant>().HasIndex(x => new { x.UserId, x.StationId }).IsUnique();
+        b.Entity<RolePermission>().HasIndex(x=>new{x.Role,x.Permission}).IsUnique();
         b.Entity<Unit>().HasIndex(x => x.MainCode).IsUnique();
         b.Entity<Unit>().HasIndex(x => x.CellCode).IsUnique();
         b.Entity<Unit>().HasIndex(x => x.SnCode).IsUnique();
@@ -39,7 +40,7 @@ public class MesDb(DbContextOptions<MesDb> options) : DbContext(options)
         Link<Passage, Unit>(b, "UnitId"); Link<Passage, Station>(b, "StationId"); Link<Passage, ProcessStep>(b, "ProcessStepId"); Link<Passage, User>(b, "UserId"); Link<Passage, SopVersion>(b, "SopVersionId"); Link<Passage, BarcodeRule>(b, "BarcodeRuleId");
         Link<ScanContext, User>(b, "UserId"); Link<ScanContext, Station>(b, "StationId"); Link<ScanContext, Batch>(b, "BatchId"); Link<ScanContext, Unit>(b, "UnitId"); Link<ScanRequest, User>(b, "UserId");
         Link<Device, Station>(b, "StationId"); Link<TestTask, Unit>(b, "UnitId"); Link<TestTask, Device>(b, "DeviceId"); Link<TestTask, Station>(b, "StationId"); Link<TestTask, Batch>(b, "BatchId");
-        Link<TestResult, TestTask>(b, "TestTaskId"); Link<TestResult, Device>(b, "DeviceId"); Link<TestItem, TestResult>(b, "TestResultId"); Link<Receipt, Device>(b, "DeviceId");
+        Link<TestTask, SopVersion>(b, "SopVersionId"); Link<TestResult, TestTask>(b, "TestTaskId"); Link<TestResult, Device>(b, "DeviceId"); Link<TestItem, TestResult>(b, "TestResultId"); Link<Receipt, Device>(b, "DeviceId");
         Link<SopVersion, ProcessStep>(b, "ProcessStepId"); Link<SopVersion, User>(b, "CreatedBy"); Link<SopVersion, User>(b, "ReviewedBy"); Link<SopFile, SopVersion>(b, "SopVersionId");
         Link<Message, Line>(b, "LineId"); Link<Message, User>(b, "CreatedBy"); Link<MessageAck, Message>(b, "MessageId"); Link<MessageAck, User>(b, "UserId");
         Link<Audit, User>(b, "UserId"); Link<ExportJob, User>(b, "UserId"); Link<ExportJob, Batch>(b, "BatchId"); Link<ExportJob, WorkOrder>(b, "WorkOrderId"); Link<BackupJob, User>(b, "UserId");
