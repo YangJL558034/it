@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import {computed,nextTick,onMounted,onUnmounted,ref,watch} from 'vue'
 import {api,blob,base} from '../api'
-import {getDocument,GlobalWorkerOptions} from 'pdfjs-dist'
-import worker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
-GlobalWorkerOptions.workerSrc=worker
+import {openSopPdf,type SopPdf} from '../pdfDocument'
 const emit=defineEmits<{loaded:[id:string|null]}>()
 const props=defineProps<{processId?:string;preview?:any}>()
 const manifest=ref<any>({version:null,files:[]}),index=ref(0),playing=ref(true),url=ref(''),error=ref(''),cached=ref(false)
 const canvas=ref<HTMLCanvasElement>(),video=ref<HTMLVideoElement>(),page=ref(1),pages=ref(1)
 const file=computed(()=>manifest.value.files[index.value])
 let timer:ReturnType<typeof setTimeout>,poll:ReturnType<typeof setInterval>,generation=0,loadEpoch=0
-let pdf:any,loadingTask:ReturnType<typeof getDocument>|undefined,renderTask:any
+let pdf:SopPdf|undefined
 async function database(){return new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open('mes-sop-cache',1);r.onupgradeneeded=()=>r.result.createObjectStore('files');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function cache(key:string,value?:any){const db=await database();try{return await new Promise<any>((resolve,reject)=>{const tx=db.transaction('files',value===undefined?'readonly':'readwrite');const r=value===undefined?tx.objectStore('files').get(key):tx.objectStore('files').put(value,key);tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error)})}finally{db.close()}}
 async function load(){
@@ -28,22 +26,14 @@ async function load(){
 }
 function schedule(){clearTimeout(timer);if(playing.value&&file.value&&!file.value.contentType.startsWith('video/'))timer=setTimeout(()=>step(1),file.value.seconds*1000)}
 async function disposePdf(){
-  const task=loadingTask;loadingTask=undefined;pdf=null
-  renderTask?.cancel();renderTask=undefined
-  // PDF.js 6 releases the document via its loading task, not PDFDocumentProxy.destroy.
+  const task=pdf;pdf=undefined
   if(task)try{await task.destroy()}catch{}
 }
 async function renderPdf(){
   const g=generation,document=pdf
   if(!document||!canvas.value)return
   try{
-    renderTask?.cancel()
-    const p=await document.getPage(page.value)
-    if(g!==generation||!canvas.value)return
-    const viewport=p.getViewport({scale:1.4})
-    canvas.value.width=viewport.width;canvas.value.height=viewport.height
-    const task=p.render({canvasContext:canvas.value.getContext('2d')!,viewport})
-    renderTask=task;await task.promise
+    await document.render(canvas.value,page.value)
   }catch(e:any){if(g===generation&&e.name!=='RenderingCancelledException')error.value=e.message}
 }
 async function show(){
@@ -59,11 +49,8 @@ async function show(){
     if(g!==generation)return
     url.value=URL.createObjectURL(b)
     if(selected.contentType==='application/pdf'){
-      const data=new Uint8Array(await b.arrayBuffer())
-      if(g!==generation)return
-      const task=getDocument({data});loadingTask=task
-      const document=await task.promise
-      if(g!==generation)return
+      const document=await openSopPdf(b)
+      if(g!==generation){await document.destroy();return}
       pdf=document;pages.value=document.numPages;await nextTick();await renderPdf()
     }
     if(g!==generation)return

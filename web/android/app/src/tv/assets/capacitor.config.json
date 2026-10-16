@@ -1,0 +1,8 @@
+{
+  "appId": "com.factory.mes.tv",
+  "appName": "聚星数据平台-制造MES",
+  "webDir": "build",
+  "server": {"androidScheme": "https", "appStartPath": "/#/tv", "errorPath": "webview-error.html"},
+  "android": {"allowMixedContent": true, "minWebViewVersion": 60},
+  "plugins": {"CapacitorHttp": {"enabled": true}}
+}

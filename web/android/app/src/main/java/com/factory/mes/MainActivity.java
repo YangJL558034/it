@@ -6,8 +6,9 @@ public class MainActivity extends BridgeActivity {
     @Override public void onCreate(Bundle state) {
         registerPlugin(StationVaultPlugin.class);
         registerPlugin(StationFeedbackPlugin.class);
+        registerPlugin(SopPdfPlugin.class);
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        bridge.getWebView().loadUrl(bridge.getLocalUrl() + "#/" + BuildConfig.MES_MODE);
+        // Entry is set before the first WebView load via build-flavor config.
     }
 }

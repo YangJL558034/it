@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import {computed,onMounted,ref} from 'vue'
+import {computed,onMounted,ref,nextTick,defineAsyncComponent} from 'vue'
 import {ElMessage} from 'element-plus'
 import {api,post,state,init,setServer,disconnect,acceptLogin,forgetStation,nativeClient} from './api'
-import Admin from './views/Admin.vue'
-import Station from './views/Station.vue'
-import Tv from './views/Tv.vue'
+const Admin=defineAsyncComponent(()=>import('./views/Admin.vue'))
+const Station=defineAsyncComponent(()=>import('./views/Station.vue'))
+const Tv=defineAsyncComponent(()=>import('./views/Tv.vue'))
 import {APP_NAME} from './branding'
 const ready=ref(false),settings=ref(false),address=ref(''),account=ref(''),password=ref(''),busy=ref(false)
-const stationLogin=ref(false),stationView=ref<InstanceType<typeof Station>>()
+const stationLogin=ref(false),stationView=ref<{cancelGuestScan():void}>()
 function cancelStationLogin(){password.value='';if(!state.user)stationView.value?.cancelGuestScan()}
 const mode=ref(location.hash.replace('#/','')||location.pathname.split('/')[1]||'pc')
 const isNative=location.protocol==='capacitor:'||location.hostname==='localhost'&&location.port===''
 const needsServer=computed(()=>settings.value||isNative&&!state.server)
-onMounted(async()=>{await init(mode.value==='station');address.value=state.server;ready.value=true})
+onMounted(async()=>{
+  try{await init(mode.value==='station')}
+  catch(e:any){ElMessage.error('启动配置读取失败：'+e.message+'。请重新设置服务器。')}
+  finally{address.value=state.server;ready.value=true;await nextTick();window.mesStartup?.ready()}
+})
 async function saveServer(){busy.value=true;try{await setServer(address.value);settings.value=false;ElMessage.success('数据库及文件服务连接正常')}catch(e:any){ElMessage.error(e.message)}finally{busy.value=false}}
 async function login(){busy.value=true;try{const r=await post(mode.value==='station'?'/api/auth/station/login':'/api/auth/login',{account:account.value,password:password.value,rememberStation:mode.value==='station',native:nativeClient});if(!r.authenticated)throw Error(r.message);await acceptLogin(r,mode.value==='station');password.value='';stationLogin.value=false;if(mode.value==='pc'){if(r.user.role==='Operator')mode.value='station';if(r.user.role==='TV')mode.value='tv'}}catch(e:any){ElMessage.error(e.message)}finally{busy.value=false}}
 async function logout(){try{await post('/api/auth/logout')}catch{}await forgetStation();await disconnect();state.user=null;state.token=''}

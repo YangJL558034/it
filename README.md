@@ -4,7 +4,7 @@
 
 2026-10-16 已确定采用官方若依前后端分离框架，源码在 `ruoyi-server/` 和 `admin-web/`，MES 独立模块为 `ruoyi-mes`。不再按“只接入若依界面”的方案推进。仅提供 **Windows x64** 安装包，32 位系统不纳入支持范围。
 
-迁移前已保存 Git 检查点和数据库/附件备份；原项目、原库及 5080 预览保留，Java 使用独立数据库和 5081 端口。阶段状态、固定上游版本、运行方式和未完成项见 [若依完整迁移清单](docs/若依完整迁移清单.md)。**以下 1.0.2 安装包、APK 和测试结论属于旧 .NET 版本，不代表 Java 迁移已完成。**
+迁移前已保存 Git 检查点和数据库/附件备份；原项目、原库及 5080 预览保留，Java 使用独立数据库和 5081 端口。阶段状态、固定上游版本、运行方式和未完成项见 [若依完整迁移清单](docs/若依完整迁移清单.md)。**以下 Windows 1.0.2 安装包及 Android 1.0.3 修复包仍连接旧 .NET API，不代表 Java 迁移已完成。**
 
 ## 保留的 1.0.2 基线
 
@@ -17,8 +17,8 @@
 ## 交付入口
 
 - Windows 离线安装包：`artifacts/installer/JuxingMES-Setup-1.0.2-win-x64.exe`，含自包含后台、编译前端、PostgreSQL、VC++ 运行组件、迁移及维护工具。目标电脑无需开发环境、Node.js 或 Python。
-- 工位 APK：`artifacts/android/juxing-mes-station-1.0.2-release.apk`。
-- TV APK：`artifacts/android/juxing-mes-tv-1.0.2-release.apk`。
+- 工位 APK：`artifacts/android/juxing-mes-station-1.0.3-release.apk`（修复旧 Android WebView 启动白屏）。
+- TV APK：`artifacts/android/juxing-mes-tv-1.0.3-release.apk`（同一修复）。
 - 完整源码：`server/`、`web/`（含 `android/`）、`installer/`、`simulator/`、`scripts/`、`tests/`。
 - [Windows 安装说明](docs/Windows安装交付.md)、[使用手册](docs/使用手册.md)、[仪器 API](docs/仪器API.md)、[服务端 API](docs/服务端API.md)、[版本与升级](docs/版本兼容与升级.md)。
 - [Android 构建与验收](docs/Android构建与验收.md)、[实际测试记录](docs/验收记录.md)。

@@ -1,7 +1,7 @@
 {
   "name": "factory-mes",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
@@ -9,6 +9,8 @@
     "android:sync": "cap sync android"
   },
   "dependencies": {
+    "@juggle/resize-observer": "3.4.0",
+    "abortcontroller-polyfill": "1.7.8",
     "@capacitor/android": "^7.4.3",
     "@capacitor/core": "^7.4.3",
     "@capacitor/preferences": "^7.0.2",
@@ -20,11 +22,20 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@vitejs/plugin-legacy": "7.2.1",
+    "terser": "5.44.1",
     "@capacitor/cli": "^7.4.3",
     "@types/node": "^24.7.2",
     "@vitejs/plugin-vue": "^6.0.1",
     "typescript": "^5.9.3",
     "vite": "^7.1.10",
     "vue-tsc": "^3.1.1"
+  },
+  "overrides": {
+    "xml2js": {"xmlbuilder": "11.0.1"},
+    "@rolldown/pluginutils": "1.0.1",
+    "path-browserify": "1.0.1",
+    "package-json-from-dist": "1.0.1",
+    "@napi-rs/canvas": "1.0.11"
   }
 }
