@@ -1,8 +1,8 @@
 {
-  "environment": "isolated Windows/PostgreSQL development environment; no real instruments",
-  "generatedAt": "2026-10-15T11:57:10.0813964+00:00",
+  "generatedAt": "2026-10-16T00:38:22.0190874+00:00",
   "suites": [
     {
+      "at": "2026-10-15T11:54:20.253Z",
       "results": [
         {
           "name": "不同用户/不同请求并发争用同一电芯，只有一个绑定成功",
@@ -29,10 +29,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:20.253Z",
       "suite": "hardening"
     },
     {
+      "at": "2026-10-15T19:50:16.9767319+08:00",
       "results": [
         {
           "status": "passed",
@@ -63,10 +63,10 @@
           "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）"
         }
       ],
-      "at": "2026-10-15T19:50:16.9767319+08:00",
       "suite": "installer"
     },
     {
+      "at": "2026-10-15T11:54:02.022Z",
       "results": [
         {
           "name": "数据库与服务器文件读写健康检查",
@@ -105,10 +105,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:02.022Z",
       "suite": "phase1"
     },
     {
+      "at": "2026-10-15T11:54:03.321Z",
       "results": [
         {
           "name": "条码不合规不创建生产记录",
@@ -147,10 +147,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:03.321Z",
       "suite": "phase2"
     },
     {
+      "at": "2026-10-15T11:54:04.801Z",
       "results": [
         {
           "name": "设备密钥认证，错误密钥拒绝",
@@ -209,10 +209,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:04.801Z",
       "suite": "phase3"
     },
     {
+      "at": "2026-10-15T11:54:05.692Z",
       "results": [
         {
           "name": "未审核 SOP 禁止发布",
@@ -247,10 +247,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:05.692Z",
       "suite": "phase4"
     },
     {
+      "at": "2026-10-15T11:54:14.679Z",
       "results": [
         {
           "name": "导出必须具体工单与批次，批次错配禁止",
@@ -285,30 +285,56 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:14.679Z",
       "suite": "phase5"
     },
     {
+      "at": "2026-10-15T19:56:25.4011913+08:00",
       "results": [
         {
           "status": "passed",
           "name": "直接启动 win-x64 自包含 EXE，数据库/文件健康、编译前端及真实登录退出通过"
         }
       ],
-      "at": "2026-10-15T19:56:25.4011913+08:00",
       "suite": "published"
     },
     {
+      "at": "2026-10-15T11:54:21.055Z",
       "results": [
         {
           "name": "独立设备模拟器实际运行 FAIL/PASS 复测及重试去重",
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:54:21.055Z",
       "suite": "simulator"
     },
     {
+      "at": "2026-10-16T00:36:49.297Z",
+      "results": [
+        {
+          "name": "未登录直接进入工位页面，只有一个扫码输入框，后台仍拒绝匿名过站",
+          "status": "passed"
+        },
+        {
+          "name": "首次扫描提示登录；取消和错误密码均不提交过站",
+          "status": "passed"
+        },
+        {
+          "name": "登录后只列授权工位，选择工单并加载 SOP 后自动提交首次条码且仅计一次",
+          "status": "passed"
+        },
+        {
+          "name": "已登录重置后可继续扫描；退出返回免登录页且再次扫码要求认证",
+          "status": "passed"
+        },
+        {
+          "name": "PC 入口仍要求登录，页面无未处理脚本异常",
+          "status": "passed"
+        }
+      ],
+      "suite": "station-entry"
+    },
+    {
+      "at": "2026-10-16T00:38:05.413Z",
       "results": [
         {
           "name": "浏览器真实登录与管理后台渲染",
@@ -331,8 +357,8 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-15T11:47:45.517Z",
       "suite": "ui"
     }
-  ]
+  ],
+  "environment": "isolated Windows/PostgreSQL development environment; no real instruments"
 }
