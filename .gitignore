@@ -18,3 +18,7 @@ artifacts/
 **/test-results/
 **/playwright-report/
 web/android/app/src/main/assets/public/
+**/target/
+admin-web/dist/
+ruoyi-server/**/logs/
+**/application-local.yml

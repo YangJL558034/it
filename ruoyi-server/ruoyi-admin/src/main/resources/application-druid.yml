@@ -1,0 +1,32 @@
+# Secrets are supplied by the installer in protected external configuration.
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: org.postgresql.Driver
+    druid:
+      master:
+        url: ${MES_DB_URL}
+        username: ${MES_DB_USER}
+        password: ${MES_DB_PASSWORD}
+      slave:
+        enabled: false
+      initialSize: 1
+      minIdle: 1
+      maxActive: 20
+      maxWait: 30000
+      connectTimeout: 10000
+      socketTimeout: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      maxEvictableIdleTimeMillis: 900000
+      validationQuery: SELECT 1
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: false
+      statViewServlet:
+        enabled: false
+      filter:
+        stat:
+          enabled: false

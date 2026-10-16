@@ -1,0 +1,9 @@
+{
+  "architecture": "x64",
+  "allow32BitWindows": false,
+  "minimumServerTarget": "Windows Server 2016 x64",
+  "minimumClientTarget": "Windows 10 x64",
+  "targetWindowsBuildMinimum": 14393,
+  "acceptanceRequired": true,
+  "note": "Target policy only. Does not assert installation acceptance on untested operating systems."
+}
