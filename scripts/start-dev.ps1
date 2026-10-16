@@ -1,4 +1,4 @@
-param([int]$Port=5080)
+param([int]$Port=5080,[string]$AdminPreviewUrl='',[string]$ListenAddress='127.0.0.1')
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 $dotnet=Join-Path $root '.tools/dotnet/dotnet.exe'
@@ -30,7 +30,9 @@ $env:ConnectionStrings__Mes="Host=127.0.0.1;Port=55432;Database=mes_development;
 $env:Bootstrap__Password=$secret.adminPassword
 $env:Storage__Root=Join-Path $local 'storage'
 $env:Backup__PgBin=$pg
-$env:ASPNETCORE_URLS="http://127.0.0.1:$Port"
+$env:ASPNETCORE_URLS="http://${ListenAddress}:$Port"
 $env:ASPNETCORE_ENVIRONMENT='Development'
-Write-Host "开发服务 http://127.0.0.1:$Port；开发管理员凭据保存于 .local/development.json（不提交仓库）"
+$env:Preview__AdminUrl=$AdminPreviewUrl
+Write-Host "开发服务监听 http://${ListenAddress}:$Port；开发管理员凭据保存于 .local/development.json（不提交仓库）"
+if($AdminPreviewUrl){Write-Host "本机管理入口转向若依预览：$AdminPreviewUrl"}
 & $dotnet run --project (Join-Path $root 'server/Mes.Api') --no-launch-profile

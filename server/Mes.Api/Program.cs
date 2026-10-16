@@ -79,6 +79,16 @@ app.MapGet("/api/health",async(MesDb db,IConfiguration config,MaintenanceState m
 app.MapAuth();app.MapMasterData();app.MapProduction();app.MapInstruments();app.MapSop();app.MapReporting();app.MapOperations();
 app.MapHub<MesHub>("/hubs/mes").RequireAuthorization();
 app.MapHub<TvHub>("/hubs/tv").AllowAnonymous();
+// During migration the local management preview can point to the official RuoYi UI.
+// This redirect is opt-in and never applies to production, station/TV or API routes.
+if(app.Environment.IsDevelopment() && Uri.TryCreate(app.Configuration["Preview:AdminUrl"],UriKind.Absolute,out var adminPreview) && adminPreview.IsLoopback && adminPreview.Scheme is "http" or "https"){
+    app.Use(async(ctx,next)=>{
+        if(ctx.Request.Method=="GET" && ctx.Request.Path.Value is "/" or "/pc" or "/pc/"){
+            ctx.Response.Redirect(adminPreview.AbsoluteUri);return;
+        }
+        await next();
+    });
+}
 app.UseDefaultFiles();app.UseStaticFiles();app.MapFallbackToFile("index.html");
 await app.RunAsync();
 public class MesHub : Hub {}
