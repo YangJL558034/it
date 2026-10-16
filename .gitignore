@@ -22,3 +22,5 @@ web/android/app/src/main/assets/public/
 admin-web/dist/
 ruoyi-server/**/logs/
 **/application-local.yml
+**/__pycache__/
+*.pyc
