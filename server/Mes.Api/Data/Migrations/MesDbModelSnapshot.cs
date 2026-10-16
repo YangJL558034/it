@@ -549,6 +549,9 @@ namespace Mes.Api.Data.Migrations
                     b.Property<DateTimeOffset>("Expires")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("StationCredentialId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -557,6 +560,8 @@ namespace Mes.Api.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StationCredentialId");
 
                     b.HasIndex("TokenHash")
                         .IsUnique();
@@ -703,6 +708,32 @@ namespace Mes.Api.Data.Migrations
                     b.HasIndex("ProcessStepId");
 
                     b.ToTable("Station");
+                });
+
+            modelBuilder.Entity("Mes.Api.Data.StationCredential", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("StationCredential");
                 });
 
             modelBuilder.Entity("Mes.Api.Data.StationGrant", b =>
@@ -1155,6 +1186,11 @@ namespace Mes.Api.Data.Migrations
 
             modelBuilder.Entity("Mes.Api.Data.Session", b =>
                 {
+                    b.HasOne("Mes.Api.Data.StationCredential", null)
+                        .WithMany()
+                        .HasForeignKey("StationCredentialId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Mes.Api.Data.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -1202,6 +1238,15 @@ namespace Mes.Api.Data.Migrations
                     b.HasOne("Mes.Api.Data.ProcessStep", null)
                         .WithMany()
                         .HasForeignKey("ProcessStepId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Mes.Api.Data.StationCredential", b =>
+                {
+                    b.HasOne("Mes.Api.Data.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

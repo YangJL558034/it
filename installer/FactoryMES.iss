@@ -4,11 +4,11 @@
 [Setup]
 AppId={{9D67ED51-9F61-4BCD-A5C4-8245A748D1B7}
 AppName=聚星数据平台-制造MES
-AppVersion=1.0.1
+AppVersion=1.0.2
 DefaultDirName={autopf}\FactoryMES
 DefaultGroupName=聚星数据平台-制造MES
 OutputDir={#BuildRoot}\installer
-OutputBaseFilename=JuxingMES-Setup-1.0.1-win-x64
+OutputBaseFilename=JuxingMES-Setup-1.0.2-win-x64
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin

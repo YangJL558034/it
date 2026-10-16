@@ -36,7 +36,7 @@ public static class Endpoints
             var active = j.GetProperty("active").GetBoolean(); Guard.Check(id != p.UserId() || (active && role == "Admin"), "不能禁用自己或撤销自己的管理员角色");
             u.Name = Str(j,"name"); u.Role = role; u.Active = active;
             if (j.TryGetProperty("password",out var pw) && !string.IsNullOrEmpty(pw.GetString())) { Guard.Password(pw.GetString()!); u.PasswordHash = new PasswordHasher<User>().HashPassword(u,pw.GetString()!); u.FailedLogins=0; u.LockedUntil=null; }
-            await db.Set<Session>().Where(x=>x.UserId==id).ExecuteDeleteAsync(); await db.SaveChangesAsync(); return Results.Ok();
+            await db.Set<Session>().Where(x=>x.UserId==id).ExecuteDeleteAsync(); await db.Set<StationCredential>().Where(x=>x.UserId==id).ExecuteDeleteAsync(); await db.SaveChangesAsync(); return Results.Ok();
         }).RequireAuthorization("Admin");
         app.MapPost("/api/admin/grants", async (JsonElement j, MesDb db) => { db.Add(new StationGrant { UserId=Id(j,"userId"),StationId=Id(j,"stationId") }); await db.SaveChangesAsync(); return Results.Ok(); }).RequireAuthorization("Admin");
         app.MapDelete("/api/admin/grants/{id:guid}", async (Guid id, MesDb db) => { await db.Set<StationGrant>().Where(x=>x.Id==id).ExecuteDeleteAsync(); return Results.Ok(); }).RequireAuthorization("Admin");

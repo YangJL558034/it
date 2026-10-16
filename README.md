@@ -8,9 +8,9 @@
 
 ## 交付入口
 
-- Windows 离线安装包：`artifacts/installer/JuxingMES-Setup-1.0.1-win-x64.exe`，含自包含后台、编译前端、PostgreSQL、VC++ 运行组件、迁移及维护工具。目标电脑无需开发环境、Node.js 或 Python。
-- 工位 APK：`artifacts/android/juxing-mes-station-1.0.1-release.apk`。
-- TV APK：`artifacts/android/juxing-mes-tv-1.0.1-release.apk`。
+- Windows 离线安装包：`artifacts/installer/JuxingMES-Setup-1.0.2-win-x64.exe`，含自包含后台、编译前端、PostgreSQL、VC++ 运行组件、迁移及维护工具。目标电脑无需开发环境、Node.js 或 Python。
+- 工位 APK：`artifacts/android/juxing-mes-station-1.0.2-release.apk`。
+- TV APK：`artifacts/android/juxing-mes-tv-1.0.2-release.apk`。
 - 完整源码：`server/`、`web/`（含 `android/`）、`installer/`、`simulator/`、`scripts/`、`tests/`。
 - [Windows 安装说明](docs/Windows安装交付.md)、[使用手册](docs/使用手册.md)、[仪器 API](docs/仪器API.md)、[服务端 API](docs/服务端API.md)、[版本与升级](docs/版本兼容与升级.md)。
 - [Android 构建与验收](docs/Android构建与验收.md)、[实际测试记录](docs/验收记录.md)。
@@ -48,3 +48,9 @@ Android Release 签名密钥位于 `.local/signing`，不提交 Git。请离线�
 [需求与架构](docs/01-需求与架构.md)、[数据库关系](docs/02-数据库与API.md)、[进度](docs/进度.md)。角色权限和工位授权由后台配置；管理员角色保留系统恢复权限。工序路线为已确认的五道工序。首版包装码按一件一码处理。
 
 程序目录与数据目录独立，升级保留数据库、附件、配置和历史，数据库变更仅通过版本化迁移。生产部署不自动试改数据库；安装器在停服务、备份后显式迁移。所有升级必须先在测试环境验证。
+
+## 1.0.2 界面与若依改造评估
+
+本版包含工位持续登录、自动聚焦与重复报警、侧边消息、SOP 指导书库、后台布局及 ECharts TV。工位密码错误不限制次数。具体见 [1.0.2 发布说明](docs/发布说明-1.0.2.md)。
+
+按用户要求先完成 [若依 A/B 改造评估](docs/若依改造评估.md) 与 [原型功能差距核查](docs/原型功能对照.md)：推荐保留现有 .NET/PostgreSQL，仅接入官方若依 Vue 3 PC 前端；本版尚未集成若依，不重写已有 MES 后台。

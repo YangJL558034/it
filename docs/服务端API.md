@@ -75,3 +75,12 @@
 SignalR `/hubs/mes` 保持用户认证；TV 专用 `/hubs/tv` 无需登录且没有生产或管理调用方法。两个通道事务提交后 `changed` 事件只表示有更新，客户端重新读取各自获权的快照。断线重连和轮询均可补齐；不可把广播事件当作过站成功凭据。
 
 兼容表及升级约束见 [版本兼容与升级](版本兼容与升级.md)。禁止客户端直接连接 PostgreSQL。
+# 1.0.2 兼容扩展
+
+POST /api/auth/login 原 account/password 保持兼容；工位增加 rememberStation=true，并携带 X-MES-Station-Auth: 1。浏览器获得 HttpOnly 的 mes.station Cookie（路径 /api/auth/station），响应不包含长期凭据；原生 APK 另传 native=true，响应中的 stationToken 交给 Android Keystore 加密存储。
+
+POST /api/auth/station/resume、POST /api/auth/station/forget 均要求 X-MES-Station-Auth: 1；浏览器请求体 {} 并携带 Cookie，原生请求体 {stationToken}。resume 返回实际 user 与短期 token。forget 撤销凭据及其派生会话。凭据不能作为 Bearer 直接访问过站 API。退出原 /api/auth/logout 也撤销当前终端凭据。
+
+GET /api/tv 新增 hourly（24 个 UTC 小时起点 at、started、completed）、planned（范围内工单计划总量）、orderCount；stations 新增 id/lineId/processStepId。原字段不删除。图表按北京时间显示，最新有效测试与完整历史测试继续采用原语义。
+
+工位专用登录 `POST /api/auth/station/login`：相同登录字段，必须 `rememberStation=true` 及 `X-MES-Station-Auth: 1`。用户明确要求工位无错误次数限制，此路径不累计失败计数、不受 PC 登录锁定或 PC 登录频率限制；错误仍返回 `authenticated=false`，密码、活动用户及服务端权限校验照常执行。`/api/auth/login` 保持原 PC 策略；旧客户端可继续使用。`/api/station/scan` 新增可选响应字段 `duplicate`：重复主码为 true，产量不变；新增请求正常过站为 false。重试仍返回相同请求的原结果。

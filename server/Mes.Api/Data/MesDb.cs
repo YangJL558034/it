@@ -8,6 +8,8 @@ public class MesDb(DbContextOptions<MesDb> options) : DbContext(options)
     {
         foreach (var t in typeof(Row).Assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Row)) && !t.IsAbstract)) b.Entity(t).HasKey("Id");
         b.Entity<User>().HasIndex(x => x.Account).IsUnique();
+        b.Entity<StationCredential>().HasIndex(x => x.TokenHash).IsUnique();
+        Link<StationCredential, User>(b, "UserId"); Link<Session, StationCredential>(b, "StationCredentialId");
         b.Entity<Session>().HasIndex(x => x.TokenHash).IsUnique();
         b.Entity<Line>().HasIndex(x => x.Code).IsUnique();
         b.Entity<Station>().HasIndex(x => x.Code).IsUnique();

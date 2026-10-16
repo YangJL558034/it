@@ -2,7 +2,8 @@ namespace Mes.Api.Data;
 
 public abstract class Row { public Guid Id { get; set; } = Guid.NewGuid(); }
 public class User : Row { public string Account { get; set; } = ""; public string Name { get; set; } = ""; public string PasswordHash { get; set; } = ""; public string Role { get; set; } = "Operator"; public bool Active { get; set; } = true; public int FailedLogins { get; set; } public DateTimeOffset? LockedUntil { get; set; } }
-public class Session : Row { public Guid UserId { get; set; } public string TokenHash { get; set; } = ""; public DateTimeOffset Expires { get; set; } }
+public class StationCredential : Row { public Guid UserId { get; set; } public string TokenHash { get; set; } = ""; public DateTimeOffset Expires { get; set; } }
+public class Session : Row { public Guid? StationCredentialId { get; set; } public Guid UserId { get; set; } public string TokenHash { get; set; } = ""; public DateTimeOffset Expires { get; set; } }
 public class Line : Row { public string Code { get; set; } = ""; public string Name { get; set; } = ""; public string Workshop { get; set; } = ""; }
 public class ProcessStep : Row { public int Sequence { get; set; } public string Name { get; set; } = ""; }
 public class Station : Row { public string Code { get; set; } = ""; public string Name { get; set; } = ""; public Guid LineId { get; set; } public Guid ProcessStepId { get; set; } public DateTimeOffset? LastSeen { get; set; } }

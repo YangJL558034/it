@@ -1,0 +1,78 @@
+import fs from 'node:fs/promises'
+import {chromium} from '../../.tools/qa/node_modules/playwright/index.mjs'
+import {assert,ok,req,login,fixture,base,secret,token,suffix,test,save} from './helpers.mjs'
+const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true})
+const context=await browser.newContext({viewport:{width:1366,height:900}}),page=await context.newPage(),errors=[]
+page.on('pageerror',e=>errors.push(e.message))
+await context.addInitScript(()=>{const Audio=window.AudioContext;window.__tones=0;window.AudioContext=class extends Audio{createOscillator(){window.__tones++;return super.createOscillator()}}})
+const stationLogin=async(account,password)=>{const r=await fetch(base+'/api/auth/station/login',{method:'POST',headers:{'Content-Type':'application/json','X-MES-Station-Auth':'1'},body:JSON.stringify({account,password,rememberStation:true,native:true})});return {status:r.status,data:await r.json()}}
+try{
+ await login();const f=await fixture(),account='scanner'+suffix,password='Scanner9-'+crypto.randomUUID()
+ const user=await ok('/api/admin/users',{account,password,name:'连续扫码验收员',role:'Operator'})
+ await ok('/api/admin/grants',{userId:user.id,stationId:f.stations[0].id})
+ await test('工位连续 24 次错误密码后仍可立即正确登录，多台会话互不踢下线',async()=>{
+   for(let i=0;i<24;i++){const r=await stationLogin(account,'wrong');assert.equal(r.status,200);assert.equal(r.data.authenticated,false)}
+   const first=await stationLogin(account,password),second=await stationLogin(account,password)
+   assert.equal(first.data.authenticated,true);assert.equal(second.data.authenticated,true)
+   assert.equal((await req('/api/station/options',undefined,'GET',first.data.token)).status,200)
+   assert.equal((await req('/api/station/options',undefined,'GET',second.data.token)).status,200)
+ })
+ const message=await ok('/api/messages',{title:'侧边消息验收'+suffix,body:'确认后继续连续扫码',important:true,lineId:f.line.id})
+ await page.goto(base+'/station');await page.getByRole('button',{name:'登录',exact:true}).click()
+ const dialog=page.getByRole('dialog',{name:'登录后开始扫码作业'})
+ await dialog.locator('input[autocomplete=username]').fill(account);await dialog.locator('input[autocomplete=current-password]').fill(password)
+ await dialog.getByRole('button',{name:'登录并继续'}).click()
+ const chooser=page.getByRole('dialog',{name:'切换授权工位与工单'}),selects=chooser.locator('.el-select')
+ await selects.nth(0).click();await page.getByRole('option',{name:f.stations[0].code+' · '+f.stations[0].name,exact:true}).click()
+ await selects.nth(1).click();await page.getByRole('option',{name:f.order.code,exact:true}).click()
+ await selects.nth(2).click();await page.getByRole('option',{name:f.batch.code,exact:true}).click()
+ await chooser.getByRole('button',{name:'进入工位'}).click();await chooser.waitFor({state:'hidden'})
+ const scan=page.getByPlaceholder('请扫描主码'),code='MC'+suffix.padStart(12,'0')
+ await test('启动自动聚焦，点击空白或失焦后扫码无需再点击输入框',async()=>{
+   await page.waitForFunction(()=>document.activeElement?.getAttribute('placeholder')==='请扫描主码')
+   await page.getByRole('heading',{name:'扫码作业',exact:true}).click()
+   await page.waitForFunction(()=>document.activeElement?.getAttribute('placeholder')==='请扫描主码')
+   await page.waitForFunction(()=>document.querySelector('.sop-player img,.sop-player canvas,.sop-player .el-empty'))
+   await page.keyboard.type(code,{delay:7})
+   await page.getByRole('heading',{name:'主码过站成功',exact:true}).waitFor()
+   assert.equal(await page.getByRole('button',{name:/重新扫描/}).count(),0)
+   await page.evaluate(()=>document.activeElement?.blur())
+   await page.keyboard.type('MC'+(Number(suffix)+1).toString().padStart(12,'0'),{delay:7})
+   await page.waitForFunction(()=>document.querySelectorAll('.station-order .stat strong')[2]?.textContent==='2')
+ })
+ await test('重复扫码显示红色警报、触发真实 WebAudio 音调，完成数不增加',async()=>{
+   const before=await page.evaluate(()=>window.__tones)
+   await page.keyboard.type(code,{delay:7})
+   await page.locator('.statusbox.fail').getByRole('heading',{name:'已过站，未重复计数',exact:true}).waitFor()
+   assert.equal(await page.locator('.station-order .stat strong').nth(2).innerText(),'2')
+   assert.ok(await page.evaluate(count=>window.__tones>=count+2,before))
+ })
+ await test('消息不占作业主区，侧边确认写入后台且关闭后自动恢复焦点',async()=>{
+   assert.equal(await page.locator('main').getByText(message.title,{exact:true}).count(),0)
+   await page.getByRole('button',{name:/^消息/}).click();const drawer=page.getByRole('dialog',{name:'工位消息'})
+   const row=drawer.locator('.inbox-message').filter({hasText:message.title})
+   await row.getByRole('button',{name:'确认收到',exact:true}).click();await row.waitFor({state:'hidden'})
+   const acks=await ok('/api/messages/'+message.id+'/acks');assert.ok(acks.some(a=>a.account===account))
+   await drawer.locator('.el-drawer__close-btn').click()
+   await page.waitForFunction(()=>document.activeElement?.getAttribute('placeholder')==='请扫描主码')
+ })
+ await test('重启页面自动恢复登录和有效工位工单，扫码框自动就绪',async()=>{
+   await page.reload();await scan.waitFor();await chooser.waitFor({state:'hidden'});await page.waitForFunction(()=>document.activeElement?.getAttribute('placeholder')==='请扫描主码')
+   assert.match(await page.locator('.stationbar').innerText(),new RegExp(f.stations[0].code))
+   await fs.mkdir('.local/screenshots',{recursive:true});await page.screenshot({path:'.local/screenshots/station-refinement-1.0.2.png',fullPage:true})
+ })
+ await test('SOP 指导书库按标题筛选，选择版本及逐文件预览使用真实附件',async()=>{
+   const v=await ok('/api/sop/versions',{title:'指导书库验收'+suffix,processStepId:f.processes[0].id})
+   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aCOsAAAAASUVORK5CYII=','base64'),body=new FormData()
+   for(const name of ['first.png','second.png'])body.append('files',new Blob([png],{type:'image/png'}),name)
+   assert.equal((await fetch(base+'/api/sop/versions/'+v.id+'/files',{method:'POST',headers:{Authorization:'Bearer '+token},body})).status,200)
+   await page.goto(base+'/pc');await page.locator('input[autocomplete=username]').fill('admin');await page.locator('input[autocomplete=current-password]').fill(secret.adminPassword)
+   await page.getByRole('button',{name:'登录',exact:true}).click();await page.getByRole('button',{name:'SOP 管理',exact:true}).click()
+   await page.getByPlaceholder('搜索指导书标题').fill(v.title);await page.locator('.sop-version-card').getByText(v.title,{exact:true}).waitFor()
+   assert.equal(await page.locator('.sop-version-card').count(),1)
+   await page.locator('.sop-version-card').click();await page.locator('.sop-detail .el-table__row').nth(1).getByRole('button',{name:'预览',exact:true}).click()
+   await page.locator('.sop-detail img[alt="second.png"]').waitFor();assert.ok(await page.locator('.sop-detail img').evaluate(img=>img.complete&&img.naturalWidth>0))
+   await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:'.local/screenshots/sop-library-1.0.2.png',fullPage:true})
+ })
+ await test('工位与 SOP 页面无未处理 JavaScript 错误',()=>assert.deepEqual(errors,[]))
+}finally{await browser.close();await save('station-refinement')}

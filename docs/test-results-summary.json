@@ -1,6 +1,7 @@
 {
   "suites": [
     {
+      "suite": "hardening",
       "results": [
         {
           "name": "不同用户/不同请求并发争用同一电芯，只有一个绑定成功",
@@ -27,44 +28,44 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:47.931Z",
-      "suite": "hardening"
+      "at": "2026-10-16T01:29:15.325Z"
     },
     {
+      "suite": "installer",
       "results": [
         {
-          "name": "有效独立路径配置通过只读预检",
-          "status": "passed"
+          "status": "passed",
+          "name": "有效独立路径配置通过只读预检"
         },
         {
-          "name": "程序与数据互相包含被拒绝",
-          "status": "passed"
+          "status": "passed",
+          "name": "程序与数据互相包含被拒绝"
         },
         {
-          "name": "业务目录等于数据根目录被拒绝",
-          "status": "passed"
+          "status": "passed",
+          "name": "业务目录等于数据根目录被拒绝"
         },
         {
-          "name": "业务目录互相包含被拒绝",
-          "status": "passed"
+          "status": "passed",
+          "name": "业务目录互相包含被拒绝"
         },
         {
-          "name": "弱初始密码被拒绝",
-          "status": "passed"
+          "status": "passed",
+          "name": "弱初始密码被拒绝"
         },
         {
-          "name": "服务与数据库端口冲突被拒绝",
-          "status": "passed"
+          "status": "passed",
+          "name": "服务与数据库端口冲突被拒绝"
         },
         {
-          "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）",
-          "status": "passed"
+          "status": "passed",
+          "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）"
         }
       ],
-      "at": "2026-10-16T08:49:17.1620872+08:00",
-      "suite": "installer"
+      "at": "2026-10-16T09:33:53.6001788+08:00"
     },
     {
+      "suite": "phase1",
       "results": [
         {
           "name": "数据库与服务器文件读写健康检查",
@@ -103,10 +104,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:28.153Z",
-      "suite": "phase1"
+      "at": "2026-10-16T01:28:55.694Z"
     },
     {
+      "suite": "phase2",
       "results": [
         {
           "name": "条码不合规不创建生产记录",
@@ -145,10 +146,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:30.101Z",
-      "suite": "phase2"
+      "at": "2026-10-16T01:28:56.979Z"
     },
     {
+      "suite": "phase3",
       "results": [
         {
           "name": "设备密钥认证，错误密钥拒绝",
@@ -207,10 +208,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:32.948Z",
-      "suite": "phase3"
+      "at": "2026-10-16T01:28:59.102Z"
     },
     {
+      "suite": "phase4",
       "results": [
         {
           "name": "未审核 SOP 禁止发布",
@@ -245,10 +246,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:33.994Z",
-      "suite": "phase4"
+      "at": "2026-10-16T01:29:00.087Z"
     },
     {
+      "suite": "phase5",
       "results": [
         {
           "name": "导出必须具体工单与批次，批次错配禁止",
@@ -283,30 +284,30 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:42.388Z",
-      "suite": "phase5"
+      "at": "2026-10-16T01:29:10.071Z"
     },
     {
+      "suite": "published",
       "results": [
         {
-          "status": "passed",
-          "name": "直接启动 win-x64 自包含 EXE，数据库/文件健康、编译前端及真实登录退出通过"
+          "name": "直接启动 win-x64 自包含 EXE，数据库/文件健康、编译前端及真实登录退出通过",
+          "status": "passed"
         }
       ],
-      "at": "2026-10-16T08:49:30.2574621+08:00",
-      "suite": "published"
+      "at": "2026-10-16T09:33:58.6841783+08:00"
     },
     {
+      "suite": "simulator",
       "results": [
         {
           "name": "独立设备模拟器实际运行 FAIL/PASS 复测及重试去重",
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:45:49.426Z",
-      "suite": "simulator"
+      "at": "2026-10-16T01:29:16.402Z"
     },
     {
+      "suite": "station-entry",
       "results": [
         {
           "name": "未登录直接进入工位页面，只有一个扫码输入框，后台仍拒绝匿名过站",
@@ -321,7 +322,7 @@
           "status": "passed"
         },
         {
-          "name": "已登录重置后可继续扫描；退出返回免登录页且再次扫码要求认证",
+          "name": "已登录无需点击重置即可继续扫描；退出返回免登录页且再次扫码要求认证",
           "status": "passed"
         },
         {
@@ -329,10 +330,44 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:46:19.972Z",
-      "suite": "station-entry"
+      "at": "2026-10-16T01:33:15.845Z"
     },
     {
+      "suite": "station-refinement",
+      "results": [
+        {
+          "name": "工位连续 24 次错误密码后仍可立即正确登录，多台会话互不踢下线",
+          "status": "passed"
+        },
+        {
+          "name": "启动自动聚焦，点击空白或失焦后扫码无需再点击输入框",
+          "status": "passed"
+        },
+        {
+          "name": "重复扫码显示红色警报、触发真实 WebAudio 音调，完成数不增加",
+          "status": "passed"
+        },
+        {
+          "name": "消息不占作业主区，侧边确认写入后台且关闭后自动恢复焦点",
+          "status": "passed"
+        },
+        {
+          "name": "重启页面自动恢复登录和有效工位工单，扫码框自动就绪",
+          "status": "passed"
+        },
+        {
+          "name": "SOP 指导书库按标题筛选，选择版本及逐文件预览使用真实附件",
+          "status": "passed"
+        },
+        {
+          "name": "工位与 SOP 页面无未处理 JavaScript 错误",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-16T01:31:39.984Z"
+    },
+    {
+      "suite": "terminal-updates",
       "results": [
         {
           "name": "TV 匿名只读数据与规则可读，管理、追溯、导出及过站仍须身份",
@@ -367,10 +402,10 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:44:54.813Z",
-      "suite": "terminal-updates"
+      "at": "2026-10-16T01:33:37.107Z"
     },
     {
+      "suite": "ui",
       "results": [
         {
           "name": "浏览器真实登录与管理后台渲染",
@@ -393,10 +428,57 @@
           "status": "passed"
         }
       ],
-      "at": "2026-10-16T00:46:58.267Z",
-      "suite": "ui"
+      "at": "2026-10-16T01:34:16.885Z"
+    },
+    {
+      "suite": "visual-session",
+      "results": [
+        {
+          "name": "终端凭据与访问令牌分离，凭据不能直接调用生产 API",
+          "status": "passed"
+        },
+        {
+          "name": "访问会话过期后凭据可签发新会话，无需再次输入密码",
+          "status": "passed"
+        },
+        {
+          "name": "退出服务器会话后，终端凭据及派生访问令牌同时撤销",
+          "status": "passed"
+        },
+        {
+          "name": "停用账号会撤销持续登录；Cookie 凭据具有 HttpOnly，缺少保护请求头被拒绝",
+          "status": "passed"
+        },
+        {
+          "name": "工位首次登录后关闭整个浏览器，再启动自动恢复实际身份",
+          "status": "passed"
+        },
+        {
+          "name": "退出工位并重启后不恢复旧身份，后台仍独立要求登录",
+          "status": "passed"
+        },
+        {
+          "name": "后台工单分页、搜索、中文状态、系统设置卡片可用",
+          "status": "passed"
+        },
+        {
+          "name": "TV 小时聚合来自真实过站，按产线隔离",
+          "status": "passed"
+        },
+        {
+          "name": "TV 1080p/4K 图表与五道工序完整显示，无页面溢出；空范围不伪造合格率",
+          "status": "passed"
+        },
+        {
+          "name": "新版界面无未处理脚本异常",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-16T01:32:05.787Z"
     }
   ],
-  "generatedAt": "2026-10-16T00:49:49.1741021+00:00",
-  "environment": "isolated Windows/PostgreSQL development environment; no real instruments"
+  "version": "1.0.2-rc.1",
+  "environment": "isolated Windows/PostgreSQL development environment; no real instruments",
+  "generatedAt": "2026-10-16T01:34:53.0307420+00:00",
+  "passed": 98
 }

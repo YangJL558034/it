@@ -26,7 +26,7 @@ public class SessionAuth(IOptionsMonitor<AuthenticationSchemeOptions> o, ILogger
         var token = raw.StartsWith("Bearer ") ? raw[7..] : Request.Path.StartsWithSegments("/hubs/mes") ? Request.Query["access_token"].ToString() : "";
         if (string.IsNullOrEmpty(token)) return AuthenticateResult.NoResult();
         var hash = Guard.Hash(token);
-        var s = await db.Set<Session>().AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == hash && x.Expires > DateTimeOffset.UtcNow);
+        var s = await db.Set<Session>().AsNoTracking().FirstOrDefaultAsync(x => x.TokenHash == hash && x.Expires > DateTimeOffset.UtcNow && (x.StationCredentialId == null || db.Set<StationCredential>().Any(c => c.Id == x.StationCredentialId && c.Expires > DateTimeOffset.UtcNow)));
         var u = s == null ? null : await db.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == s.UserId && x.Active);
         if (u == null) return AuthenticateResult.Fail("会话已失效");
         var claims = new[] { new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()), new Claim(ClaimTypes.Name, u.Name), new Claim(ClaimTypes.Role, u.Role), new Claim("session", s!.Id.ToString()) };
@@ -35,24 +35,38 @@ public class SessionAuth(IOptionsMonitor<AuthenticationSchemeOptions> o, ILogger
 }
 public static class AuthEndpoints
 {
-    public record Login(string Account, string Password);
+    public record Login(string Account, string Password, bool RememberStation = false, bool Native = false);
     public static void MapAuth(this WebApplication app)
     {
-        app.MapPost("/api/auth/login", async (Login input, MesDb db) => {
+        StationAuth.Map(app);
+        async Task<IResult> LoginUser(Login input, MesDb db, HttpContext http) {
+            var stationLogin = http.Request.Path == "/api/auth/station/login";
+            if (stationLogin) { StationAuth.CheckHeader(http); Guard.Check(input.RememberStation, "工位登录必须使用终端登录流程"); }
             var u = await db.Users.FirstOrDefaultAsync(x => x.Account == input.Account && x.Active);
-            if (u?.LockedUntil > DateTimeOffset.UtcNow) return Results.Json(new { code = "locked", message = "登录失败次数过多，请稍后重试" }, statusCode: 429);
+            if (!stationLogin && u?.LockedUntil > DateTimeOffset.UtcNow) return Results.Json(new { code = "locked", message = "登录失败次数过多，请稍后重试" }, statusCode: 429);
             var hasher = new PasswordHasher<User>();
             if (u == null || hasher.VerifyHashedPassword(u, u.PasswordHash, input.Password) == PasswordVerificationResult.Failed) {
-                if (u != null) { u.FailedLogins++; if (u.FailedLogins >= 5) u.LockedUntil = DateTimeOffset.UtcNow.AddMinutes(15); await db.SaveChangesAsync(); }
+                if (!stationLogin && u != null) { u.FailedLogins++; if (u.FailedLogins >= 5) u.LockedUntil = DateTimeOffset.UtcNow.AddMinutes(15); await db.SaveChangesAsync(); }
                 // Return 200 with explicit failure so lockout counters commit in the write transaction.
                 return Results.Ok(new { authenticated = false, message = "账号或密码错误" });
             }
-            u.FailedLogins = 0; u.LockedUntil = null;
-            var token = Guard.Token(); db.Add(new Session { UserId = u.Id, TokenHash = Guard.Hash(token), Expires = u.Role=="TV"?DateTimeOffset.UtcNow.AddDays(30):DateTimeOffset.UtcNow.AddHours(8) }); await db.SaveChangesAsync();
-            return Results.Ok(new { authenticated = true, token, user = new { u.Id, u.Account, u.Name, u.Role } });
-        }).RequireRateLimiting("login");
+            if (!stationLogin) { u.FailedLogins = 0; u.LockedUntil = null; }
+            StationCredential? credential = null; string? stationToken = null;
+            if (input.RememberStation) {
+                StationAuth.CheckHeader(http);
+                stationToken = Guard.Token();
+                credential = new StationCredential { UserId = u.Id, TokenHash = Guard.Hash(stationToken), Expires = DateTimeOffset.UtcNow.AddYears(10) };
+                db.Add(credential);
+                if (!input.Native) StationAuth.SetCookie(http, stationToken, credential.Expires);
+            }
+            var token = Guard.Token(); db.Add(new Session { UserId = u.Id, StationCredentialId = credential?.Id, TokenHash = Guard.Hash(token), Expires = credential==null&&u.Role=="TV"?DateTimeOffset.UtcNow.AddDays(30):DateTimeOffset.UtcNow.AddHours(8) }); await db.SaveChangesAsync();
+            return Results.Ok(new { authenticated = true, token, stationToken = input.Native ? stationToken : null, user = new { u.Id, u.Account, u.Name, u.Role } });
+        }
+        app.MapPost("/api/auth/login", LoginUser).RequireRateLimiting("login");
+        // Station operators may retry passwords without an attempt limit or timed lockout.
+        app.MapPost("/api/auth/station/login", LoginUser);
         app.MapGet("/api/auth/me", async (ClaimsPrincipal p, MesDb db) => await db.Users.Where(x => x.Id == p.UserId()).Select(u => new { u.Id, u.Account, u.Name, u.Role }).SingleAsync()).RequireAuthorization();
-        app.MapPost("/api/auth/logout", async (ClaimsPrincipal p, MesDb db) => { var id = Guid.Parse(p.FindFirstValue("session")!); await db.Set<Session>().Where(x => x.Id == id).ExecuteDeleteAsync(); return Results.Ok(); }).RequireAuthorization();
+        app.MapPost("/api/auth/logout", async (ClaimsPrincipal p, MesDb db) => { var id = Guid.Parse(p.FindFirstValue("session")!); var session = await db.Set<Session>().FindAsync(id); if (session?.StationCredentialId is Guid credentialId) { await db.Set<Session>().Where(x => x.StationCredentialId == credentialId).ExecuteDeleteAsync(); await db.Set<StationCredential>().Where(x => x.Id == credentialId).ExecuteDeleteAsync(); } else await db.Set<Session>().Where(x => x.Id == id).ExecuteDeleteAsync(); return Results.Ok(); }).RequireAuthorization();
     }
     public static async Task Seed(MesDb db, IConfiguration config)
     {

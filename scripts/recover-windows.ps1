@@ -50,7 +50,7 @@ try{
   Replace-Folder (Join-Path $stage 'attachments') $cfg.Storage.Attachments
   & (Join-Path $ProgramDir 'Mes.Api.exe') --migrate-only --config $ConfigFile --contentRoot $ProgramDir
   if($LASTEXITCODE -ne 0){throw '恢复后的迁移校验失败'}
-  Run-Pg 'psql' @('-v','ON_ERROR_STOP=1','-c','DELETE FROM "Session";')
+  Run-Pg 'psql' @('-v','ON_ERROR_STOP=1','-c','DELETE FROM "Session"; DO $$ BEGIN IF to_regclass(''public."StationCredential"'') IS NOT NULL THEN DELETE FROM "StationCredential"; END IF; END $$;')
   foreach($entry in $manifest.Files.PSObject.Properties){$target=$null;if($entry.Name.StartsWith('sop/')){$target=Assert-Child (Join-Path $cfg.Storage.Sop $entry.Name.Substring(4)) $cfg.Storage.Sop};if($entry.Name.StartsWith('attachments/')){$target=Assert-Child (Join-Path $cfg.Storage.Attachments $entry.Name.Substring(12)) $cfg.Storage.Attachments};if($target -and (Get-FileHash -LiteralPath $target).Hash -ne $entry.Value){throw '恢复后附件校验失败'}}
   Remove-Item -LiteralPath $marker
   Start-Service FactoryMES

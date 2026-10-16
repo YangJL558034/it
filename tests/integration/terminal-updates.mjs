@@ -29,7 +29,7 @@ try{
   await test('TV 直接打开无登录框，品牌正确并显示真实五工序与连接状态',async()=>{
     await page.goto(base+'/tv');await page.locator('.tv-flow>div').nth(4).waitFor();assert.equal(await page.title(),'聚星数据平台-制造MES')
     assert.equal(await page.locator('input[autocomplete="username"]').count(),0);assert.equal(await page.getByRole('button',{name:'管理后台',exact:true}).count(),0)
-    await page.getByText('● 实时连接正常',{exact:false}).waitFor();assert.ok((await page.locator('.board-brand').innerText()).includes('聚星数据平台-制造MES'));await shot('juxing-tv')
+    await page.locator('footer').getByText('实时连接正常',{exact:false}).waitFor();assert.ok((await page.locator('.board-brand').innerText()).includes('聚星数据平台-制造MES'));await shot('juxing-tv')
   })
   async function choose(index){
     const chooser=page.getByRole('dialog',{name:'切换授权工位与工单'})

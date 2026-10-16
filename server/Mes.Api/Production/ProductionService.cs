@@ -72,10 +72,10 @@ public static class Endpoints
             if(ctx==null){ctx=new ScanContext{UserId=uid,StationId=s.Id,BatchId=input.BatchId};db.Add(ctx);}
             if(ctx.BatchId!=input.BatchId||ctx.Expires<DateTimeOffset.UtcNow){ctx.UnitId=null;ctx.BatchId=input.BatchId;}
             ctx.Expires=DateTimeOffset.UtcNow.AddMinutes(10);
-            Unit? u=null;string message;string waiting=n==5?"SN":"主码";
+            Unit? u=null;bool duplicate=false;string message;string waiting=n==5?"SN":"主码";
             if(n==1){
                 var rule=await prod.Barcode("main",input.Code);u=await db.Set<Unit>().SingleOrDefaultAsync(x=>x.MainCode==input.Code);
-                if(u!=null){Guard.Check(u.BatchId==input.BatchId,"主码已属于其他工单或批次","cross_order",409);message="已过站，未重复计数";}
+                if(u!=null){Guard.Check(u.BatchId==input.BatchId,"主码已属于其他工单或批次","cross_order",409);duplicate=true;message="已过站，未重复计数";}
                 else {await prod.FreeCode(input.Code);var batch=await db.Set<Batch>().FindAsync(input.BatchId);Guard.Check(await db.Set<Unit>().CountAsync(x=>x.BatchId==input.BatchId)<batch!.Plan,"批次计划数量已完成","plan_complete",409);u=new Unit{BatchId=input.BatchId,MainCode=input.Code};db.Add(u);await prod.AddPassage(u,s,uid,rule.Id);message="主码过站成功";}
             } else if(ctx.UnitId==null) {
                 await prod.Barcode(n==5?"sn":"main",input.Code);
@@ -91,7 +91,7 @@ public static class Endpoints
                 await prod.AddPassage(u,s,uid,rule.Id);ctx.UnitId=null;message="绑定成功";
             }
             s.LastSeen=DateTimeOffset.UtcNow;await db.SaveChangesAsync();
-            var response=JsonSerializer.Serialize(new{message,waiting,unit=u,trace=await prod.Trace(u!),pending=ctx.UnitId!=null},new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            var response=JsonSerializer.Serialize(new{message,waiting,duplicate,unit=u,trace=await prod.Trace(u!),pending=ctx.UnitId!=null},new JsonSerializerOptions(JsonSerializerDefaults.Web));
             db.Add(new ScanRequest{UserId=uid,RequestId=input.RequestId,Hash=hash,Response=response});await db.SaveChangesAsync();return Results.Content(response,"application/json");
         }).RequireAuthorization("Operate");
         app.MapPost("/api/station/reset",async(ScanInput i,ClaimsPrincipal p,MesDb db,ProductionService prod)=>{await prod.Station(i.StationId,p);await db.Set<ScanContext>().Where(x=>x.UserId==p.UserId()&&x.StationId==i.StationId).ExecuteDeleteAsync();return Results.Ok();}).RequireAuthorization("Operate");

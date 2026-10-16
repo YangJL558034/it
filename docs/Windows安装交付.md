@@ -1,6 +1,6 @@
 # Windows 安装、升级与维护
 
-安装包：`artifacts/installer/JuxingMES-Setup-1.0.1-win-x64.exe`。当前为待现场验收候选版本：已编译，干净 Windows 安装、系统重启与卸载验收尚未执行。目标 Windows x64，建议 Windows 11 或 Windows Server 2019+，管理员运行。包含 ASP.NET Core 10 自包含后台、编译前端、PostgreSQL 17.11、Microsoft VC++ x64 运行组件、EF 迁移和维护脚本。目标电脑无需联网下载、Node.js、Python、SDK 或手工执行 SQL。
+安装包：`artifacts/installer/JuxingMES-Setup-1.0.2-win-x64.exe`。当前为待现场验收候选版本：已编译，干净 Windows 安装、系统重启与卸载验收尚未执行。目标 Windows x64，建议 Windows 11 或 Windows Server 2019+，管理员运行。包含 ASP.NET Core 10 自包含后台、编译前端、PostgreSQL 17.11、Microsoft VC++ x64 运行组件、EF 迁移和维护脚本。目标电脑无需联网下载、Node.js、Python、SDK 或手工执行 SQL。
 
 ## 首次安装
 

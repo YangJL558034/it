@@ -73,8 +73,8 @@ app.Use(async(ctx,next)=>{
 });
 app.UseAuthorization();
 app.MapGet("/api/health",async(MesDb db,IConfiguration config,MaintenanceState maintenance)=>{
-    if(maintenance.Active)return Results.Ok(new{status="maintenance",maintenance=true,version="1.0.1"});
-    await db.Database.ExecuteSqlRawAsync("SELECT 1");foreach(var folder in new[]{"Sop","Attachments","Logs","Backups"}){var path=Path.Combine(StoragePaths.Get(config,folder),"health-"+Guid.NewGuid()+".tmp");await File.WriteAllTextAsync(path,"ok");File.Delete(path);}return Results.Ok(new{status="ok",database=true,files=true,version="1.0.1",apiVersion="v1",supportedClients=new{station="1.0.x",tv="1.0.x"},at=DateTimeOffset.UtcNow});
+    if(maintenance.Active)return Results.Ok(new{status="maintenance",maintenance=true,version="1.0.2"});
+    await db.Database.ExecuteSqlRawAsync("SELECT 1");foreach(var folder in new[]{"Sop","Attachments","Logs","Backups"}){var path=Path.Combine(StoragePaths.Get(config,folder),"health-"+Guid.NewGuid()+".tmp");await File.WriteAllTextAsync(path,"ok");File.Delete(path);}return Results.Ok(new{status="ok",database=true,files=true,version="1.0.2",apiVersion="v1",supportedClients=new{station="1.0.x",tv="1.0.x"},at=DateTimeOffset.UtcNow});
 });
 app.MapAuth();app.MapMasterData();app.MapProduction();app.MapInstruments();app.MapSop();app.MapReporting();app.MapOperations();
 app.MapHub<MesHub>("/hubs/mes").RequireAuthorization();

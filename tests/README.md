@@ -9,3 +9,8 @@
 `node tests/integration/station-entry.mjs` 使用实际浏览器和隔离数据库验证免登录进入工位、首次扫码认证、取消/错误密码不放行、授权选择/SOP 加载后提交一次、退出再认证，以及 PC 仍须登录。运行前构建前端并更新开发服务的 wwwroot。
 
 `node tests/integration/terminal-updates.mjs` 验证 1.0.1 匿名 TV/通知只读边界、品牌和导航隔离、按长度自动提交及规则实时更新。该脚本临时发布主码长度规则并在 finally 恢复原值，必须单独串行执行；不要与扫码回归或现场生产并行运行。
+# 1.0.2 补充验收
+
+`node tests/integration/visual-session.mjs` 验证凭据隔离、退出/停用撤销、浏览器完全关闭重开、后台搜索分页、TV 小时聚合和 1080p/4K 布局。使用独立 .local/qa-persistent-* 浏览器资料目录，只保存隔离开发环境凭据，不入 Git。不得连接生产数据库。
+
+`node tests/integration/station-refinement.mjs`：工位 24 次错误后登录、多会话、自动聚焦及失焦连续扫码、重复警报和不重复计数、消息侧栏真实确认、重启恢复工位、SOP 库及逐文件预览。

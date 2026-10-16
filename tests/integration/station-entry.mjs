@@ -57,8 +57,8 @@ try{
     assert.equal((await ok('/api/station/summary?stationId='+f.stations[0].id+'&batchId='+f.batch.id)).done,1)
     await chooser.waitFor({state:'hidden'});assert.equal(await page.locator('input:visible').count(),1)
   })
-  await test('已登录重置后可继续扫描；退出返回免登录页且再次扫码要求认证',async()=>{
-    await page.getByRole('button',{name:'重新扫描主码',exact:true}).click()
+  await test('已登录无需点击重置即可继续扫描；退出返回免登录页且再次扫码要求认证',async()=>{
+    assert.equal(await page.getByRole('button',{name:'重新扫描主码',exact:true}).count(),0)
     const scan=page.getByPlaceholder('请扫描主码',{exact:true})
     await scan.fill(main);await scan.press('Tab')
     await page.getByRole('heading',{name:'已过站，未重复计数',exact:true}).waitFor()

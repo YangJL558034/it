@@ -1,6 +1,30 @@
 {
-  "name": "factory-mes", "private": true, "version": "1.0.1", "type": "module",
-  "scripts": { "dev": "vite --host 127.0.0.1", "build": "vue-tsc --noEmit && vite build", "android:sync": "cap sync android" },
-  "dependencies": { "vue": "^3.5.22", "vue-router": "^4.6.3", "element-plus": "^2.11.5", "@microsoft/signalr": "^10.0.0", "@capacitor/core": "^7.4.3", "@capacitor/android": "^7.4.3", "@capacitor/preferences": "^7.0.2", "pdfjs-dist": "^5.4.296" },
-  "devDependencies": { "@vitejs/plugin-vue": "^6.0.1", "vite": "^7.1.10", "typescript": "^5.9.3", "vue-tsc": "^3.1.1", "@capacitor/cli": "^7.4.3", "@types/node": "^24.7.2" }
+  "name": "factory-mes",
+  "private": true,
+  "version": "1.0.2",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "android:sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/preferences": "^7.0.2",
+    "@microsoft/signalr": "^10.0.0",
+    "echarts": "6.1.0",
+    "element-plus": "^2.11.5",
+    "pdfjs-dist": "6.2.108",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "@types/node": "^24.7.2",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.10",
+    "vue-tsc": "^3.1.1"
+  }
 }
