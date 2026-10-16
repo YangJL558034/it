@@ -64,17 +64,24 @@ app.Use(async(ctx,next)=>{
         db.ChangeTracker.Clear();
         if(!maintenance.Active){db.Add(new Audit{UserId=ctx.User.Identity?.IsAuthenticated==true?ctx.User.UserId():null,Action=ctx.Request.Method+" "+ctx.Request.Path,Detail=auditDetail,Outcome=ctx.Response.StatusCode.ToString()});await db.SaveChangesAsync();}
         ctx.Response.Body=original; buffer.Position=0; await buffer.CopyToAsync(original);
-        if(ctx.Response.StatusCode<400) await ctx.RequestServices.GetRequiredService<IHubContext<MesHub>>().Clients.All.SendAsync("changed", new {at=DateTimeOffset.UtcNow});
+        if(ctx.Response.StatusCode<400){
+            var notification=new {at=DateTimeOffset.UtcNow};
+            await ctx.RequestServices.GetRequiredService<IHubContext<MesHub>>().Clients.All.SendAsync("changed",notification);
+            await ctx.RequestServices.GetRequiredService<IHubContext<TvHub>>().Clients.All.SendAsync("changed",notification);
+        }
     }
 });
 app.UseAuthorization();
 app.MapGet("/api/health",async(MesDb db,IConfiguration config,MaintenanceState maintenance)=>{
-    if(maintenance.Active)return Results.Ok(new{status="maintenance",maintenance=true,version="1.0.0"});
-    await db.Database.ExecuteSqlRawAsync("SELECT 1");foreach(var folder in new[]{"Sop","Attachments","Logs","Backups"}){var path=Path.Combine(StoragePaths.Get(config,folder),"health-"+Guid.NewGuid()+".tmp");await File.WriteAllTextAsync(path,"ok");File.Delete(path);}return Results.Ok(new{status="ok",database=true,files=true,version="1.0.0",apiVersion="v1",supportedClients=new{station="1.0.x",tv="1.0.x"},at=DateTimeOffset.UtcNow});
+    if(maintenance.Active)return Results.Ok(new{status="maintenance",maintenance=true,version="1.0.1"});
+    await db.Database.ExecuteSqlRawAsync("SELECT 1");foreach(var folder in new[]{"Sop","Attachments","Logs","Backups"}){var path=Path.Combine(StoragePaths.Get(config,folder),"health-"+Guid.NewGuid()+".tmp");await File.WriteAllTextAsync(path,"ok");File.Delete(path);}return Results.Ok(new{status="ok",database=true,files=true,version="1.0.1",apiVersion="v1",supportedClients=new{station="1.0.x",tv="1.0.x"},at=DateTimeOffset.UtcNow});
 });
 app.MapAuth();app.MapMasterData();app.MapProduction();app.MapInstruments();app.MapSop();app.MapReporting();app.MapOperations();
 app.MapHub<MesHub>("/hubs/mes").RequireAuthorization();
+app.MapHub<TvHub>("/hubs/tv").AllowAnonymous();
 app.UseDefaultFiles();app.UseStaticFiles();app.MapFallbackToFile("index.html");
 await app.RunAsync();
 public class MesHub : Hub {}
+// Public notifications only: no callable production or management hub methods.
+public class TvHub : Hub {}
 public partial class Program {}

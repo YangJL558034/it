@@ -17,7 +17,7 @@ if($Release){
 if($LASTEXITCODE -ne 0){throw 'Android build failed'}
 New-Item -ItemType Directory -Force "$root/artifacts/android" | Out-Null
 $folder=$variant.ToLowerInvariant()
-Copy-Item "android/app/build/outputs/apk/station/$folder/*.apk" "$root/artifacts/android/mes-station-1.0.0-$folder.apk" -Force
-Copy-Item "android/app/build/outputs/apk/tv/$folder/*.apk" "$root/artifacts/android/mes-tv-1.0.0-$folder.apk" -Force
+Copy-Item "android/app/build/outputs/apk/station/$folder/*.apk" "$root/artifacts/android/juxing-mes-station-1.0.1-$folder.apk" -Force
+Copy-Item "android/app/build/outputs/apk/tv/$folder/*.apk" "$root/artifacts/android/juxing-mes-tv-1.0.1-$folder.apk" -Force
 if($Release){Remove-Item Env:MES_KEYSTORE_PASSWORD -ErrorAction SilentlyContinue}
 Get-FileHash "$root/artifacts/android/*.apk" -Algorithm SHA256

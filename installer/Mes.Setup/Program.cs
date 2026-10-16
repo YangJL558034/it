@@ -19,7 +19,7 @@ try{
     var configPath=Path.Combine(r.DataDir,"configuration","appsettings.Local.json");var upgrade=File.Exists(configPath);
     var statePath=Path.Combine(r.DataDir,"configuration","upgrade-state.json");
     if(args[0]=="prepare"){
-        if(upgrade){var prior=JsonDocument.Parse(await File.ReadAllTextAsync(configPath));var priorProgram=Path.GetFullPath(Path.Combine(prior.RootElement.GetProperty("Backup").GetProperty("PgBin").GetString()!,"..",".."));if(!priorProgram.TrimEnd('\\').Equals(Path.GetFullPath(r.ProgramDir).TrimEnd('\\'),StringComparison.OrdinalIgnoreCase))throw new Exception("升级必须选择原程序目录；目录迁移请使用备份恢复流程。");var version=FileVersionInfo.GetVersionInfo(Path.Combine(r.ProgramDir,"Mes.Api.exe")).FileVersion;if(Version.TryParse(version,out var previous)&&previous>new Version(1,0,0,0))throw new Exception("不允许使用旧安装包降级已有程序，请恢复匹配版本的整套备份。");}
+        if(upgrade){var prior=JsonDocument.Parse(await File.ReadAllTextAsync(configPath));var priorProgram=Path.GetFullPath(Path.Combine(prior.RootElement.GetProperty("Backup").GetProperty("PgBin").GetString()!,"..",".."));if(!priorProgram.TrimEnd('\\').Equals(Path.GetFullPath(r.ProgramDir).TrimEnd('\\'),StringComparison.OrdinalIgnoreCase))throw new Exception("升级必须选择原程序目录；目录迁移请使用备份恢复流程。");var version=FileVersionInfo.GetVersionInfo(Path.Combine(r.ProgramDir,"Mes.Api.exe")).FileVersion;if(Version.TryParse(version,out var previous)&&previous>new Version(1,0,1,0))throw new Exception("不允许使用旧安装包降级已有程序，请恢复匹配版本的整套备份。");}
         if(Directory.Exists(r.ProgramDir)&&Directory.EnumerateFileSystemEntries(r.ProgramDir).Any()&&!File.Exists(Path.Combine(r.ProgramDir,"Mes.Api.exe")))throw new Exception("程序目录非空且不属于 MES，请选择空目录。");
         if(!upgrade && Directory.Exists(r.DataDir)&&Directory.EnumerateFileSystemEntries(r.DataDir).Any())throw new Exception("数据目录非空，禁止覆盖。请选择新的独立数据目录，或选择已有 MES 的数据目录升级。");
         if(!upgrade){PortFree(r.Port);if(r.DbMode=="new")PortFree(r.DbPort);else await CheckDatabase(r,false);}
@@ -57,8 +57,8 @@ try{
         var environment=new Dictionary<string,string>{{"ASPNETCORE_ENVIRONMENT","Production"},{"Bootstrap__Password",r.AdminPassword}};
         await Run(Path.Combine(r.ProgramDir,"Mes.Api.exe"),["--migrate-only","--config",configPath,"--contentRoot",r.ProgramDir],environment);
         var bin="\""+Path.Combine(r.ProgramDir,"Mes.Api.exe")+"\" --config \""+configPath+"\" --contentRoot \""+r.ProgramDir+"\"";
-        if(upgrade)await Run("sc.exe",["config","FactoryMES","binPath=",bin,"start=","auto"]);
-        else await Run("sc.exe",["create","FactoryMES","binPath=",bin,"start=","auto","obj=","NT AUTHORITY\\LocalService","DisplayName=","Factory MES Server"]);
+        if(upgrade)await Run("sc.exe",["config","FactoryMES","binPath=",bin,"start=","auto","DisplayName=","聚星数据平台-制造MES"]);
+        else await Run("sc.exe",["create","FactoryMES","binPath=",bin,"start=","auto","obj=","NT AUTHORITY\\LocalService","DisplayName=","聚星数据平台-制造MES"]);
         await Run("sc.exe",["failure","FactoryMES","reset=","86400","actions=","restart/5000/restart/10000/restart/30000"]);
         var effective=JsonDocument.Parse(await File.ReadAllTextAsync(configPath));var url=effective.RootElement.GetProperty("Urls").GetString()!;var port=new Uri(url).Port;
         if(r.Firewall){await Run("netsh.exe",["advfirewall","firewall","delete","rule","name=FactoryMES"],allowFailure:true);await Run("netsh.exe",["advfirewall","firewall","add","rule","name=FactoryMES","dir=in","action=allow","protocol=TCP","localport="+port,"profile=private,domain"]);}

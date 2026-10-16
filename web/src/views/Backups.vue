@@ -2,7 +2,7 @@
 import {onMounted,onUnmounted,ref} from 'vue'
 import {ElMessage} from 'element-plus'
 import {api,post,download,stamp} from '../api'
-const rows=ref<any[]>([]),settings=ref<any>({factory:'智造 MES',backupIntervalHours:'24',backupRetentionDays:'30'}),preview=ref<any>(),confirmation=ref(''),id=ref(''),busy=ref(false),status=ref<any>();let timer:ReturnType<typeof setInterval>
+const rows=ref<any[]>([]),settings=ref<any>({factory:'聚星数据平台-制造MES',backupIntervalHours:'24',backupRetentionDays:'30'}),preview=ref<any>(),confirmation=ref(''),id=ref(''),busy=ref(false),status=ref<any>();let timer:ReturnType<typeof setInterval>
 async function load(){try{rows.value=await api('/api/backups');status.value=await api('/api/maintenance')}catch{}}
 async function create(){await post('/api/backups');await load()}
 async function preflight(row:any){busy.value=true;try{id.value=row.id;preview.value=await post('/api/backups/'+row.id+'/preview');confirmation.value=''}catch(e:any){ElMessage.error(e.message)}finally{busy.value=false}}

@@ -29,7 +29,7 @@ public static class Endpoints
                 stations=await db.Set<Station>().Where(s=>selected.Contains(s.LineId)).Select(s=>new{s.Code,s.Name,online=s.LastSeen>now.AddSeconds(-90)}).ToListAsync(),
                 tests=await (from t in tasks join r in db.Set<TestResult>() on t.Id equals r.TestTaskId join u in units on t.UnitId equals u.Id orderby r.ReceivedAt descending select new{u.MainCode,r.Verdict,r.ReceivedAt}).Take(12).ToListAsync(),
                 exceptions=await (from r in db.Set<Receipt>() join d in db.Set<Device>() on r.DeviceId equals d.Id join s in db.Set<Station>() on d.StationId equals s.Id where selected.Contains(s.LineId)&&r.Status=="Rejected" orderby r.At descending select new{r.At,r.Reason,device=d.Code}).Take(5).ToListAsync()};
-        }).RequireAuthorization("Board");
+        }).AllowAnonymous();
     }
     public static async Task ExecuteExport(MesDb db,ExportJob job,IConfiguration c)
     {

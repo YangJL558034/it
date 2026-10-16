@@ -3,12 +3,12 @@
 #endif
 [Setup]
 AppId={{9D67ED51-9F61-4BCD-A5C4-8245A748D1B7}
-AppName=智造 MES 服务器
-AppVersion=1.0.0
+AppName=聚星数据平台-制造MES
+AppVersion=1.0.1
 DefaultDirName={autopf}\FactoryMES
-DefaultGroupName=智造 MES
+DefaultGroupName=聚星数据平台-制造MES
 OutputDir={#BuildRoot}\installer
-OutputBaseFilename=FactoryMES-Setup-1.0.0-win-x64
+OutputBaseFilename=JuxingMES-Setup-1.0.1-win-x64
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
@@ -30,9 +30,9 @@ ButtonBack=< 上一步(&B)
 ButtonInstall=安装(&I)
 ButtonCancel=取消
 ButtonFinish=完成(&F)
-WelcomeLabel1=欢迎安装智造 MES 服务器
+WelcomeLabel1=欢迎安装聚星数据平台-制造MES
 WelcomeLabel2=本安装包包含后台、前端、PostgreSQL 和迁移工具，可离线安装。%n%n程序与业务数据分开保存。首次安装不会覆盖已有数据库。升级前将自动备份旧版本和数据。%n%n继续前请确认本机为测试或已批准的正式服务器。
-FinishedHeadingLabel=智造 MES 安装完成
+FinishedHeadingLabel=聚星数据平台-制造MES 安装完成
 FinishedLabel=数据库、附件目录和 HTTP 健康检查已通过。访问地址显示在下方，并保存于数据目录的“访问地址.txt”。
 
 [Files]

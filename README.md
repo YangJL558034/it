@@ -1,4 +1,4 @@
-# 智造 MES
+# 聚星数据平台-制造MES
 
 基于当前中文原型开发的 Vue 3 / TypeScript / Element Plus + ASP.NET Core 10 + EF Core + PostgreSQL 模块化单体。PC、工位、TV 使用真实服务端；生产数据不保存到浏览器。`dist/` 仅保留原型设计，不用于正式部署。
 
@@ -8,14 +8,14 @@
 
 ## 交付入口
 
-- Windows 离线安装包：`artifacts/installer/FactoryMES-Setup-1.0.0-win-x64.exe`，含自包含后台、编译前端、PostgreSQL、VC++ 运行组件、迁移及维护工具。目标电脑无需开发环境、Node.js 或 Python。
-- 工位 APK：`artifacts/android/mes-station-1.0.0-release.apk`。
-- TV APK：`artifacts/android/mes-tv-1.0.0-release.apk`。
+- Windows 离线安装包：`artifacts/installer/JuxingMES-Setup-1.0.1-win-x64.exe`，含自包含后台、编译前端、PostgreSQL、VC++ 运行组件、迁移及维护工具。目标电脑无需开发环境、Node.js 或 Python。
+- 工位 APK：`artifacts/android/juxing-mes-station-1.0.1-release.apk`。
+- TV APK：`artifacts/android/juxing-mes-tv-1.0.1-release.apk`。
 - 完整源码：`server/`、`web/`（含 `android/`）、`installer/`、`simulator/`、`scripts/`、`tests/`。
 - [Windows 安装说明](docs/Windows安装交付.md)、[使用手册](docs/使用手册.md)、[仪器 API](docs/仪器API.md)、[服务端 API](docs/服务端API.md)、[版本与升级](docs/版本兼容与升级.md)。
 - [Android 构建与验收](docs/Android构建与验收.md)、[实际测试记录](docs/验收记录.md)。
 
-首次安装由向导设置 `admin` 密码，没有默认生产密码。后台地址 `/pc`，工位 `/station`，TV `/tv`。APK 首次使用先填写服务器基础地址并验证健康，再登录。
+首次安装由向导设置 `admin` 密码，没有默认生产密码。后台地址 `/pc`，工位 `/station`，TV `/tv`。工位 APK 首次配置服务器后免登录进入，正式扫码时认证；TV 页面及 APK 无需人员登录，只读展示。扫码达到后台发布的长度后自动提交，无需手动回车。
 
 ## 开发与测试
 

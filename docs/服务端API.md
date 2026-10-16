@@ -28,6 +28,7 @@
 
 | 方法 / 路径 | 请求与行为 |
 |---|---|
+| GET /api/station/barcode-rules | 无需登录，只返回四类当前已发布规则的 kind/version/length/prefixes/charset，用于长度自动提交 |
 | GET /api/station/options | 授权工位及对应工单、批次 |
 | POST /api/station/scan | `{requestId,stationId,batchId,code,sopVersionId}`；每次物理扫描新 requestId，同一扫描网络重试使用原 ID 和原内容 |
 | POST /api/station/reset | `{stationId}`；清除当前用户该工位等待状态 |
@@ -64,13 +65,13 @@
 | POST /api/reports/search | filter，返回 total 和前 200 条预览 |
 | POST /api/exports | `{kind:"products"或"passages"或"tests",filter}` → 202 后台任务 |
 | GET /api/exports；GET /api/exports/{id}/download | 状态与 CSV 下载，限定任务本人或管理员 |
-| GET /api/tv?lineId=…&workshop=… | 只读真实五工序、工单、产量、合格率、在线工位、异常、测试 |
+| GET /api/tv?lineId=…&workshop=… | 无需登录，只读真实五工序、工单、产量、合格率、在线工位、异常、测试 |
 | GET/POST /api/backups | 日志/创建真实数据库及文件备份任务 |
 | GET /api/backups/{id}/download | 下载 ZIP，内含 pg_dump、文件、配置摘要和校验清单 |
 | POST /api/backups/{id}/preview | 校验、展示恢复范围，返回限时一次性确认票据 |
 | POST /api/backups/{id}/restore | `{ticket,confirmation:"RESTORE <备份UUID>"}`；确切字段以后台恢复页和 Operations/Endpoints.cs 为准 |
 | GET /api/maintenance | 恢复状态；期间写入返回 503 |
 
-SignalR `/hubs/mes` 使用同一用户认证；事务提交后 `changed` 事件只表示有更新，客户端重新读取各自获权的快照。断线重连和轮询均可补齐；不可把广播事件当作过站成功凭据。
+SignalR `/hubs/mes` 保持用户认证；TV 专用 `/hubs/tv` 无需登录且没有生产或管理调用方法。两个通道事务提交后 `changed` 事件只表示有更新，客户端重新读取各自获权的快照。断线重连和轮询均可补齐；不可把广播事件当作过站成功凭据。
 
 兼容表及升级约束见 [版本兼容与升级](版本兼容与升级.md)。禁止客户端直接连接 PostgreSQL。

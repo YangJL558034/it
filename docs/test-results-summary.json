@@ -1,8 +1,6 @@
 {
-  "generatedAt": "2026-10-16T00:38:22.0190874+00:00",
   "suites": [
     {
-      "at": "2026-10-15T11:54:20.253Z",
       "results": [
         {
           "name": "不同用户/不同请求并发争用同一电芯，只有一个绑定成功",
@@ -29,44 +27,44 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:47.931Z",
       "suite": "hardening"
     },
     {
-      "at": "2026-10-15T19:50:16.9767319+08:00",
       "results": [
         {
-          "status": "passed",
-          "name": "有效独立路径配置通过只读预检"
+          "name": "有效独立路径配置通过只读预检",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "程序与数据互相包含被拒绝"
+          "name": "程序与数据互相包含被拒绝",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "业务目录等于数据根目录被拒绝"
+          "name": "业务目录等于数据根目录被拒绝",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "业务目录互相包含被拒绝"
+          "name": "业务目录互相包含被拒绝",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "弱初始密码被拒绝"
+          "name": "弱初始密码被拒绝",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "服务与数据库端口冲突被拒绝"
+          "name": "服务与数据库端口冲突被拒绝",
+          "status": "passed"
         },
         {
-          "status": "passed",
-          "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）"
+          "name": "已有非空 PostgreSQL 数据库禁止首次安装覆盖（真实连接只读检查）",
+          "status": "passed"
         }
       ],
+      "at": "2026-10-16T08:49:17.1620872+08:00",
       "suite": "installer"
     },
     {
-      "at": "2026-10-15T11:54:02.022Z",
       "results": [
         {
           "name": "数据库与服务器文件读写健康检查",
@@ -105,10 +103,10 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:28.153Z",
       "suite": "phase1"
     },
     {
-      "at": "2026-10-15T11:54:03.321Z",
       "results": [
         {
           "name": "条码不合规不创建生产记录",
@@ -147,10 +145,10 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:30.101Z",
       "suite": "phase2"
     },
     {
-      "at": "2026-10-15T11:54:04.801Z",
       "results": [
         {
           "name": "设备密钥认证，错误密钥拒绝",
@@ -209,10 +207,10 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:32.948Z",
       "suite": "phase3"
     },
     {
-      "at": "2026-10-15T11:54:05.692Z",
       "results": [
         {
           "name": "未审核 SOP 禁止发布",
@@ -247,10 +245,10 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:33.994Z",
       "suite": "phase4"
     },
     {
-      "at": "2026-10-15T11:54:14.679Z",
       "results": [
         {
           "name": "导出必须具体工单与批次，批次错配禁止",
@@ -285,30 +283,30 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:42.388Z",
       "suite": "phase5"
     },
     {
-      "at": "2026-10-15T19:56:25.4011913+08:00",
       "results": [
         {
           "status": "passed",
           "name": "直接启动 win-x64 自包含 EXE，数据库/文件健康、编译前端及真实登录退出通过"
         }
       ],
+      "at": "2026-10-16T08:49:30.2574621+08:00",
       "suite": "published"
     },
     {
-      "at": "2026-10-15T11:54:21.055Z",
       "results": [
         {
           "name": "独立设备模拟器实际运行 FAIL/PASS 复测及重试去重",
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:45:49.426Z",
       "suite": "simulator"
     },
     {
-      "at": "2026-10-16T00:36:49.297Z",
       "results": [
         {
           "name": "未登录直接进入工位页面，只有一个扫码输入框，后台仍拒绝匿名过站",
@@ -331,10 +329,48 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:46:19.972Z",
       "suite": "station-entry"
     },
     {
-      "at": "2026-10-16T00:38:05.413Z",
+      "results": [
+        {
+          "name": "TV 匿名只读数据与规则可读，管理、追溯、导出及过站仍须身份",
+          "status": "passed"
+        },
+        {
+          "name": "匿名 TV SignalR 仅接收更新通知",
+          "status": "passed"
+        },
+        {
+          "name": "TV 直接打开无登录框，品牌正确并显示真实五工序与连接状态",
+          "status": "passed"
+        },
+        {
+          "name": "工位达到长度自动提示登录，管理员登录后也不显示跨端管理入口",
+          "status": "passed"
+        },
+        {
+          "name": "超长枪码不截断自动放行，回车提交返回明确长度错误",
+          "status": "passed"
+        },
+        {
+          "name": "连续主码和电芯码按各自长度自动绑定，扫码枪追加回车不重复提交",
+          "status": "passed"
+        },
+        {
+          "name": "后台发布新条码长度后终端实时采用，无需改代码",
+          "status": "passed"
+        },
+        {
+          "name": "终端页面无未处理脚本错误",
+          "status": "passed"
+        }
+      ],
+      "at": "2026-10-16T00:44:54.813Z",
+      "suite": "terminal-updates"
+    },
+    {
       "results": [
         {
           "name": "浏览器真实登录与管理后台渲染",
@@ -357,8 +393,10 @@
           "status": "passed"
         }
       ],
+      "at": "2026-10-16T00:46:58.267Z",
       "suite": "ui"
     }
   ],
+  "generatedAt": "2026-10-16T00:49:49.1741021+00:00",
   "environment": "isolated Windows/PostgreSQL development environment; no real instruments"
 }

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="title_activity_main">智造 MES</string>
+    <string name="title_activity_main">聚星数据平台-制造MES</string>
     <string name="package_name">com.factory.mes</string>
     <string name="custom_url_scheme">com.factory.mes</string>
 </resources>

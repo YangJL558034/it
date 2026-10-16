@@ -51,6 +51,10 @@ public static class Endpoints
 {
     public static void MapProduction(this WebApplication app)
     {
+        // Only published scanner configuration is public; production operations remain authenticated.
+        app.MapGet("/api/station/barcode-rules",async(MesDb db)=>await db.Set<BarcodeRule>()
+            .Where(r=>!db.Set<BarcodeRule>().Any(n=>n.Kind==r.Kind&&n.Version>r.Version))
+            .Select(r=>new{r.Kind,r.Version,r.Length,r.Prefixes,r.Charset}).ToListAsync()).AllowAnonymous();
         app.MapGet("/api/station/options",async(ClaimsPrincipal p,MesDb db)=>{
             var uid=p.UserId();var stations=await db.Set<Station>().Where(s=>p.IsInRole("Admin")||db.Set<StationGrant>().Any(g=>g.UserId==uid&&g.StationId==s.Id)).ToListAsync();var lines=stations.Select(s=>s.LineId).ToArray();
             var orders=await db.Set<WorkOrder>().Where(o=>lines.Contains(o.LineId)&&o.Status=="Open").ToListAsync();var ids=orders.Select(o=>o.Id).ToArray();
