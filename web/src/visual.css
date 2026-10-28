@@ -59,3 +59,8 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif}
 /* Prototype native-input defaults must not impose a 200px minimum on Element Plus controls. */
 .el-input__inner{min-width:0;border:0;padding:0;background:transparent;box-shadow:none!important}
 .el-input__inner:focus{border:0;box-shadow:none}
+.board-brand img.board-logo{object-fit:contain;border:0;background:transparent;border-radius:0}
+
+.connection-screen{min-height:100vh;padding:16px}.connection-card{max-height:calc(100vh - 32px);overflow:auto;padding:24px}.connection-card h1{font-size:clamp(20px,2.3vw,28px)}.connection-actions{position:sticky;bottom:-24px;background:white;padding:12px 0;display:flex;gap:12px}.connection-actions .el-button+.el-button{margin-left:0}
+
+.terminal-dialog{max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);margin:12px auto;display:flex;flex-direction:column;padding:16px}.terminal-dialog .el-dialog__header{flex-shrink:0;padding-bottom:12px}.terminal-dialog .el-dialog__body{overflow:auto;padding-top:12px;flex:1}.terminal-dialog .el-dialog__footer{flex-shrink:0;padding-top:12px}.station-auth-dialog .el-form-item{margin-bottom:14px}

@@ -58,6 +58,11 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource><directory>src/main/resources</directory></resource>
+            <resource><directory>../../admin-web/dist</directory><targetPath>static/admin</targetPath></resource>
+            <resource><directory>../../web/build</directory><targetPath>static/terminal</targetPath></resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

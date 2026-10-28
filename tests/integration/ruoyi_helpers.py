@@ -1,13 +1,15 @@
 """Only the fixed, isolated RuoYi development environment. Never production."""
 import json
+import os
 import socket
 import urllib.request
 import urllib.error
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-config = json.loads((root / '.local/ruoyi/development.json').read_text(encoding='utf-8-sig'))
-base = 'http://127.0.0.1:5081'
+operations = os.environ.get('MES_TEST_PROFILE') == 'operations'
+config = json.loads((root / ('.local/ruoyi-ops-test/development.json' if operations else '.local/ruoyi/development.json')).read_text(encoding='utf-8-sig'))
+base = 'http://127.0.0.1:5082' if operations else 'http://127.0.0.1:5081'
 
 def api(path, method='GET', data=None, token=None):
     headers = {'Content-Type': 'application/json'}
@@ -21,7 +23,7 @@ def api(path, method='GET', data=None, token=None):
     return json.loads(response.read())
 
 def redis_value(key):
-    with socket.create_connection(('127.0.0.1', 56379), timeout=5) as client:
+    with socket.create_connection(('127.0.0.1', 56380 if operations else 56379), timeout=5) as client:
         stream = client.makefile('rb')
         def command(*parts):
             raw = [str(p).encode() for p in parts]

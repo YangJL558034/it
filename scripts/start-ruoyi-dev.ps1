@@ -49,6 +49,13 @@ $env:MES_DATA_DIRECTORY = (Join-Path $local 'data').Replace('\','/')
 $env:MES_BOOTSTRAP_PASSWORD_FILE = Join-Path $local 'initial-admin-password'
 [IO.File]::WriteAllText($env:MES_BOOTSTRAP_PASSWORD_FILE, $config.adminPassword)
 $env:MES_PORT = "$Port"
+$env:MES_PG_BIN = $pg
 Write-Host "若依隔离开发服务 http://127.0.0.1:$Port；开发凭据位于 .local/ruoyi/development.json（不提交 Git）。"
-try { & java -jar (Join-Path $root 'ruoyi-server/ruoyi-admin/target/ruoyi-admin.jar') }
+$builtJar=Join-Path $root 'ruoyi-server/ruoyi-admin/target/ruoyi-admin.jar'
+$runtimeFolder=Join-Path $local 'runtime'
+New-Item -ItemType Directory -Force $runtimeFolder | Out-Null
+$jarHash=(Get-FileHash -LiteralPath $builtJar -Algorithm SHA256).Hash.Substring(0,16)
+$runtimeJar=Join-Path $runtimeFolder ('ruoyi-admin-'+$jarHash+'.jar')
+if(!(Test-Path -LiteralPath $runtimeJar)){Copy-Item -LiteralPath $builtJar -Destination $runtimeJar}
+try { & java -jar $runtimeJar }
 finally { Remove-Item -LiteralPath $env:MES_BOOTSTRAP_PASSWORD_FILE -ErrorAction SilentlyContinue }

@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import logo from '@/assets/logo/logo.png'
+import useBrandingStore from '@/store/modules/branding'
 import useSettingsStore from '@/store/modules/settings'
 import variables from '@/assets/styles/variables.module.scss'
 
@@ -25,7 +25,9 @@ defineProps({
   }
 })
 
-const title = import.meta.env.VITE_APP_TITLE
+const branding=useBrandingStore()
+const logo=computed(()=>branding.logo)
+const title=computed(()=>branding.name)
 const settingsStore = useSettingsStore()
 const sideTheme = computed(() => settingsStore.sideTheme)
 

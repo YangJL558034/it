@@ -5,11 +5,15 @@
 <script setup>
 import useSettingsStore from '@/store/modules/settings'
 import { handleThemeStyle } from '@/utils/theme'
+import useBrandingStore from '@/store/modules/branding'
+const branding=useBrandingStore()
 
 onMounted(() => {
+  branding.start()
   nextTick(() => {
     // 初始化主题样式
     handleThemeStyle(useSettingsStore().theme)
   })
 })
+onUnmounted(()=>branding.stop())
 </script>
