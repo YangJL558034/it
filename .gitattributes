@@ -6,3 +6,7 @@ web/android/gradlew text eol=lf
 *.pdf binary
 *.jar binary
 docs/third-party/*.txt -text -whitespace
+*.exe filter=lfs diff=lfs merge=lfs -text
+*.apk filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.bundle filter=lfs diff=lfs merge=lfs -text

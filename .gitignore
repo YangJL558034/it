@@ -13,7 +13,9 @@ server/Mes.Api/wwwroot/
 .env
 .env.*
 !.env.example
-artifacts/
+artifacts/postgres/
+artifacts/source/
+.backup/
 **/appsettings.Local.json
 **/test-results/
 **/playwright-report/

@@ -1,0 +1,5 @@
+6e6c2940b5357a068c78334f446454793a2cb4dd80baea2288d3303c1c16261c  installer/FactoryMES-Setup-1.0.0-win-x64.exe
+8273f749fb3fbfc521c66ccd08b37827bdfba12a825f9964fe11cac2b0f809a7  android/mes-station-1.0.0-release.apk
+050f497c54c49ef5e915bad5e0c3462a26c738a4a276ffb79bebc862bf95815f  android/mes-tv-1.0.0-release.apk
+53011df447939d2d7a249e6df6fc71a3644b85425b66d2a872dd87b488b6b7f5  source/FactoryMES-1.0.0-rc.1-source.zip
+0ddc50796441b8874bed8c4f60985a2943edeb3a315ac82463b3f144d2a3af04  source/FactoryMES-1.0.0-rc.1.git.bundle

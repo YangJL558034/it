@@ -1,0 +1,5 @@
+ad54b47671dc250280254ecf3a61a058750d189379617ea9b37234321b02fb98  artifacts/installer/JuxingMES-Setup-1.0.1-win-x64.exe
+3619e8354862f6203395c599035bd2acb2d1f0524fdf5ca7682afaf0a4c923d1  artifacts/android/juxing-mes-station-1.0.1-release.apk
+ba8c2a86989e2bb88871e0394de73c981d3a69f7e464b4469f0953f33930c4eb  artifacts/android/juxing-mes-tv-1.0.1-release.apk
+cf28ae7c0e9ef04c8ef9c8b8714a188e5a4a0d1d230d64cd3db09fae5d83ad0a  artifacts/source/JuxingMES-1.0.1-rc.1-source.zip
+7b3b9fe6035e763e3114bbb29efc9af40fde20f8eb546880cc0c62a6c91b6fe5  artifacts/source/JuxingMES-1.0.1-rc.1.git.bundle
